@@ -1,0 +1,1940 @@
+openapi: 3.1.0
+info:
+  title: MIVA Study League Backend API
+  version: 1.0.0
+  summary: Backend contract required by the MIVA Study League frontend.
+  description: |
+    This OpenAPI specification defines the HTTP endpoints required for the frontend
+    to operate as a complete full-stack application.
+
+    Base URL in frontend:
+    - VITE_API_URL (defaults to http://localhost:3000/api)
+
+    Realtime channel in frontend:
+    - VITE_WS_URL (defaults to http://localhost:3000)
+
+    Socket.IO events expected by the frontend are listed under `x-socketio-events`.
+servers:
+  - url: http://localhost:3000/api
+    description: Local development
+  - url: https://api.miva-study-league.example/api
+    description: Production
+
+tags:
+  - name: Auth
+  - name: Users
+  - name: Teams
+  - name: Missions
+  - name: Challenges
+  - name: Submissions
+  - name: Leaderboard
+  - name: Scores
+  - name: Awards
+  - name: Notifications
+  - name: Season
+
+security:
+  - bearerAuth: []
+
+paths:
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Authenticate a user.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new student account.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Account created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /auth/forgot-password:
+    post:
+      tags: [Auth]
+      summary: Request a password reset email.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+      responses:
+        '200':
+          description: Password reset email sent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+
+  /auth/reset-password:
+    post:
+      tags: [Auth]
+      summary: Reset password using token.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '200':
+          description: Password reset success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+
+  /auth/setup-password:
+    post:
+      tags: [Auth]
+      summary: Setup initial password after invite.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetupPasswordRequest'
+      responses:
+        '200':
+          description: Initial password setup success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh access and refresh tokens.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: New tokens returned in wrapper object expected by frontend interceptor.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout current user.
+      responses:
+        '200':
+          description: Logout success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Get current authenticated user profile.
+      responses:
+        '200':
+          description: Current user profile.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /users:
+    get:
+      tags: [Users]
+      summary: List users.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - in: query
+          name: search
+          schema:
+            type: string
+        - in: query
+          name: role
+          schema:
+            $ref: '#/components/schemas/UserRole'
+      responses:
+        '200':
+          description: Paginated users.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUsers'
+
+  /users/{id}:
+    get:
+      tags: [Users]
+      summary: Get user by id.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: User profile.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [Users]
+      summary: Update user profile.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: Updated user profile.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    delete:
+      tags: [Users]
+      summary: Delete user.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: User deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+
+  /users/{id}/role:
+    patch:
+      tags: [Users]
+      summary: Update user role (admin only).
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRoleRequest'
+      responses:
+        '200':
+          description: Updated user profile.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /teams:
+    get:
+      tags: [Teams]
+      summary: List all teams.
+      responses:
+        '200':
+          description: Team list.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Team'
+    post:
+      tags: [Teams]
+      summary: Create team (admin only).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTeamRequest'
+      responses:
+        '201':
+          description: Team created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+
+  /teams/{id}:
+    get:
+      tags: [Teams]
+      summary: Get team detail.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Team details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+    patch:
+      tags: [Teams]
+      summary: Update team.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTeamRequest'
+      responses:
+        '200':
+          description: Updated team.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+
+  /teams/{id}/join:
+    post:
+      tags: [Teams]
+      summary: Join a team.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Joined team details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+
+  /teams/{id}/leave:
+    post:
+      tags: [Teams]
+      summary: Leave a team.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Left team successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+
+  /teams/{id}/transfer:
+    post:
+      tags: [Teams]
+      summary: Transfer to another team.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferTeamRequest'
+      responses:
+        '200':
+          description: Transfer success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+
+  /teams/{id}/roles:
+    patch:
+      tags: [Teams]
+      summary: Update team role assignments.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTeamRolesRequest'
+      responses:
+        '200':
+          description: Updated team details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+
+  /missions:
+    get:
+      tags: [Missions]
+      summary: List missions.
+      parameters:
+        - in: query
+          name: status
+          schema:
+            $ref: '#/components/schemas/MissionStatus'
+      responses:
+        '200':
+          description: Mission list.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Mission'
+    post:
+      tags: [Missions]
+      summary: Create mission (admin only).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMissionRequest'
+      responses:
+        '201':
+          description: Mission created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mission'
+
+  /missions/current:
+    get:
+      tags: [Missions]
+      summary: Get current active mission.
+      responses:
+        '200':
+          description: Active mission.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mission'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /missions/{id}:
+    get:
+      tags: [Missions]
+      summary: Get mission by id.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Mission details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mission'
+    patch:
+      tags: [Missions]
+      summary: Update mission (admin only).
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMissionRequest'
+      responses:
+        '200':
+          description: Updated mission.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mission'
+    delete:
+      tags: [Missions]
+      summary: Delete mission (admin only).
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Mission deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+
+  /missions/{id}/publish:
+    post:
+      tags: [Missions]
+      summary: Publish mission (admin only).
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Published mission.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mission'
+
+  /challenges:
+    get:
+      tags: [Challenges]
+      summary: List challenges.
+      responses:
+        '200':
+          description: Challenge list.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Challenge'
+    post:
+      tags: [Challenges]
+      summary: Create challenge (admin only).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateChallengeRequest'
+      responses:
+        '201':
+          description: Challenge created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Challenge'
+
+  /challenges/{id}:
+    get:
+      tags: [Challenges]
+      summary: Get challenge detail.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Challenge details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Challenge'
+    patch:
+      tags: [Challenges]
+      summary: Update challenge (admin only).
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateChallengeRequest'
+      responses:
+        '200':
+          description: Updated challenge.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Challenge'
+
+  /challenges/{id}/start:
+    post:
+      tags: [Challenges]
+      summary: Start a challenge (admin only).
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Live challenge state.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Challenge'
+
+  /challenges/{id}/stop:
+    post:
+      tags: [Challenges]
+      summary: Stop a challenge (admin only).
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Stopped challenge state.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Challenge'
+
+  /challenges/{id}/rounds:
+    get:
+      tags: [Challenges]
+      summary: List rounds for a challenge.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Round list.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Round'
+    post:
+      tags: [Challenges]
+      summary: Add challenge round (admin only).
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRoundRequest'
+      responses:
+        '201':
+          description: Created round.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Round'
+
+  /submissions:
+    get:
+      tags: [Submissions]
+      summary: List submissions.
+      parameters:
+        - in: query
+          name: challengeId
+          schema:
+            type: string
+        - in: query
+          name: teamId
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Submission list.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Submission'
+    post:
+      tags: [Submissions]
+      summary: Submit challenge answer.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitAnswerRequest'
+      responses:
+        '201':
+          description: Submission created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submission'
+
+  /submissions/{id}/upload:
+    post:
+      tags: [Submissions]
+      summary: Attach file to submission.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Updated submission.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submission'
+
+  /leaderboard:
+    get:
+      tags: [Leaderboard]
+      summary: Current team standings.
+      responses:
+        '200':
+          description: Leaderboard entries.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LeaderboardEntry'
+
+  /leaderboard/weekly:
+    get:
+      tags: [Leaderboard]
+      summary: Weekly standings.
+      parameters:
+        - in: query
+          name: week
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Weekly leaderboard entries.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LeaderboardEntry'
+
+  /leaderboard/history:
+    get:
+      tags: [Leaderboard]
+      summary: Historical weekly leaderboard snapshots.
+      responses:
+        '200':
+          description: Weekly snapshots.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required: [weekNumber, entries]
+                  properties:
+                    weekNumber:
+                      type: integer
+                    entries:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/LeaderboardEntry'
+
+  /leaderboard/individual:
+    get:
+      tags: [Leaderboard]
+      summary: Individual student standings.
+      responses:
+        '200':
+          description: Individual leaderboard entries.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IndividualRanking'
+
+  /scores:
+    get:
+      tags: [Scores]
+      summary: List score entries.
+      parameters:
+        - in: query
+          name: challengeId
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Score list.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Score'
+    post:
+      tags: [Scores]
+      summary: Enter score (admin only).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateScoreRequest'
+      responses:
+        '201':
+          description: Score created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Score'
+
+  /scores/{id}:
+    patch:
+      tags: [Scores]
+      summary: Update score (admin only).
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateScoreRequest'
+      responses:
+        '200':
+          description: Updated score.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Score'
+
+  /awards:
+    get:
+      tags: [Awards]
+      summary: List award definitions.
+      responses:
+        '200':
+          description: Awards.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Award'
+    post:
+      tags: [Awards]
+      summary: Create award (admin only).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAwardRequest'
+      responses:
+        '201':
+          description: Award created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Award'
+
+  /awards/winners:
+    get:
+      tags: [Awards]
+      summary: List award winners.
+      responses:
+        '200':
+          description: Award winners.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AwardWinner'
+
+  /awards/{id}/nominate:
+    post:
+      tags: [Awards]
+      summary: Nominate a user for an award.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NominateAwardRequest'
+      responses:
+        '200':
+          description: Nomination accepted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+
+  /awards/{id}/winner:
+    post:
+      tags: [Awards]
+      summary: Declare award winner (admin only).
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeclareWinnerRequest'
+      responses:
+        '200':
+          description: Winner declared.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AwardWinner'
+
+  /notifications:
+    get:
+      tags: [Notifications]
+      summary: List current user's notifications.
+      responses:
+        '200':
+          description: Notification list.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+
+  /notifications/{id}/read:
+    patch:
+      tags: [Notifications]
+      summary: Mark one notification as read.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Updated notification.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+
+  /notifications/read-all:
+    patch:
+      tags: [Notifications]
+      summary: Mark all notifications as read.
+      responses:
+        '200':
+          description: Read state updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+
+  /season:
+    get:
+      tags: [Season]
+      summary: Get active season settings.
+      responses:
+        '200':
+          description: Active season.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Season'
+    patch:
+      tags: [Season]
+      summary: Update season settings (admin only).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSeasonRequest'
+      responses:
+        '200':
+          description: Updated season.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Season'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    IdPath:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+    Page:
+      in: query
+      name: page
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    Limit:
+      in: query
+      name: limit
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+  responses:
+    BadRequest:
+      description: Validation failed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    Unauthorized:
+      description: Missing or invalid credentials.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    Forbidden:
+      description: Action not allowed for current role.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+
+  schemas:
+    ApiMessage:
+      type: object
+      required: [success, message]
+      properties:
+        success:
+          type: boolean
+          const: true
+        message:
+          type: string
+
+    ApiError:
+      type: object
+      required: [success, message]
+      properties:
+        success:
+          type: boolean
+          const: false
+        message:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+
+    RegisterRequest:
+      type: object
+      required: [email, fullName, studentId, password]
+      properties:
+        email:
+          type: string
+          format: email
+        fullName:
+          type: string
+          minLength: 2
+        studentId:
+          type: string
+          minLength: 3
+        password:
+          type: string
+          minLength: 8
+
+    ForgotPasswordRequest:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+
+    ResetPasswordRequest:
+      type: object
+      required: [token, password]
+      properties:
+        token:
+          type: string
+        password:
+          type: string
+          minLength: 8
+
+    SetupPasswordRequest:
+      type: object
+      required: [token, password]
+      properties:
+        token:
+          type: string
+        password:
+          type: string
+          minLength: 8
+
+    RefreshTokenRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+
+    RefreshResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [accessToken, refreshToken]
+          properties:
+            accessToken:
+              type: string
+            refreshToken:
+              type: string
+
+    LoginResponse:
+      type: object
+      required: [user, token, refreshToken]
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        token:
+          type: string
+        refreshToken:
+          type: string
+
+    UserRole:
+      type: string
+      enum: [student, admin]
+
+    User:
+      type: object
+      required: [id, email, fullName, studentId, role, transferTokens, totalPoints, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        fullName:
+          type: string
+        name:
+          type:
+            - string
+            - 'null'
+        studentId:
+          type: string
+        role:
+          $ref: '#/components/schemas/UserRole'
+        teamId:
+          type:
+            - string
+            - 'null'
+        teamName:
+          type:
+            - string
+            - 'null'
+        avatarUrl:
+          type:
+            - string
+            - 'null'
+        transferTokens:
+          type: integer
+          minimum: 0
+        graceDeadline:
+          anyOf:
+            - type: string
+              format: date-time
+            - type: 'null'
+        totalPoints:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    UpdateUserRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        fullName:
+          type: string
+        avatarUrl:
+          type: string
+        teamName:
+          type: string
+
+    UpdateUserRoleRequest:
+      type: object
+      required: [role]
+      properties:
+        role:
+          $ref: '#/components/schemas/UserRole'
+
+    PaginatedUsers:
+      type: object
+      required: [success, data, total, page, limit, totalPages]
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        totalPages:
+          type: integer
+
+    TeamRole:
+      type: string
+      enum:
+        - captain
+        - academic_lead
+        - presenter
+        - record_keeper
+        - timekeeper
+        - qa
+        - strategist
+
+    TeamMember:
+      type: object
+      required: [id, userId, teamId, joinedAt]
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        teamId:
+          type: string
+        role:
+          anyOf:
+            - $ref: '#/components/schemas/TeamRole'
+            - type: 'null'
+        joinedAt:
+          type: string
+          format: date-time
+        user:
+          $ref: '#/components/schemas/User'
+
+    Team:
+      type: object
+      required: [id, name, emoji, maxMembers, members, totalPoints, weeklyPoints, rank, wins, losses, streak, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        emoji:
+          type: string
+        slogan:
+          type: string
+        maxMembers:
+          type: integer
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamMember'
+        totalPoints:
+          type: integer
+        weeklyPoints:
+          type: integer
+        rank:
+          type: integer
+        wins:
+          type: integer
+        losses:
+          type: integer
+        streak:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateTeamRequest:
+      type: object
+      required: [name, emoji, slogan, maxMembers]
+      properties:
+        name:
+          type: string
+        emoji:
+          type: string
+        slogan:
+          type: string
+        maxMembers:
+          type: integer
+          minimum: 1
+
+    UpdateTeamRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+        emoji:
+          type: string
+        slogan:
+          type: string
+        maxMembers:
+          type: integer
+
+    TransferTeamRequest:
+      type: object
+      required: [targetTeamId]
+      properties:
+        targetTeamId:
+          type: string
+
+    UpdateTeamRolesRequest:
+      type: object
+      required: [assignments]
+      properties:
+        assignments:
+          type: array
+          items:
+            type: object
+            required: [userId, role]
+            properties:
+              userId:
+                type: string
+              role:
+                $ref: '#/components/schemas/TeamRole'
+
+    MissionStatus:
+      type: string
+      enum: [draft, published, active, completed]
+
+    MissionTask:
+      type: object
+      required: [id, description, isRequired, order]
+      properties:
+        id:
+          type: string
+        description:
+          type: string
+        isRequired:
+          type: boolean
+        order:
+          type: integer
+
+    Mission:
+      type: object
+      required: [id, title, description, weekNumber, course, status, tasks, deadline, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        weekNumber:
+          type: integer
+        course:
+          type: string
+        status:
+          $ref: '#/components/schemas/MissionStatus'
+        tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/MissionTask'
+        deadline:
+          type: string
+          format: date-time
+        publishedAt:
+          anyOf:
+            - type: string
+              format: date-time
+            - type: 'null'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateMissionRequest:
+      type: object
+      required: [title, description, weekNumber, course, deadline, tasks]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        weekNumber:
+          type: integer
+        course:
+          type: string
+        deadline:
+          type: string
+          format: date-time
+        tasks:
+          type: array
+          items:
+            type: object
+            required: [description, isRequired, order]
+            properties:
+              description:
+                type: string
+              isRequired:
+                type: boolean
+              order:
+                type: integer
+
+    UpdateMissionRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        weekNumber:
+          type: integer
+        course:
+          type: string
+        deadline:
+          type: string
+          format: date-time
+        status:
+          $ref: '#/components/schemas/MissionStatus'
+
+    ChallengeStatus:
+      type: string
+      enum: [scheduled, live, completed, cancelled]
+
+    RoundType:
+      type: string
+      enum: [quick_fire, problem_battle, team_challenge, final_challenge]
+
+    Round:
+      type: object
+      required: [id, challengeId, type, title, prompt, timeLimitSeconds, maxPoints, order, status]
+      properties:
+        id:
+          type: string
+        challengeId:
+          type: string
+        type:
+          $ref: '#/components/schemas/RoundType'
+        title:
+          type: string
+        description:
+          type: string
+        prompt:
+          type: string
+        timeLimitSeconds:
+          type: integer
+        maxPoints:
+          type: integer
+        order:
+          type: integer
+        status:
+          $ref: '#/components/schemas/ChallengeStatus'
+        startedAt:
+          anyOf:
+            - type: string
+              format: date-time
+            - type: 'null'
+        endedAt:
+          anyOf:
+            - type: string
+              format: date-time
+            - type: 'null'
+
+    Challenge:
+      type: object
+      required: [id, title, description, weekNumber, status, scheduledAt, rounds, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        weekNumber:
+          type: integer
+        status:
+          $ref: '#/components/schemas/ChallengeStatus'
+        scheduledAt:
+          type: string
+          format: date-time
+        startedAt:
+          anyOf:
+            - type: string
+              format: date-time
+            - type: 'null'
+        endedAt:
+          anyOf:
+            - type: string
+              format: date-time
+            - type: 'null'
+        rounds:
+          type: array
+          items:
+            $ref: '#/components/schemas/Round'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateChallengeRequest:
+      type: object
+      required: [title, description, weekNumber, scheduledAt]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        weekNumber:
+          type: integer
+        scheduledAt:
+          type: string
+          format: date-time
+
+    UpdateChallengeRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        weekNumber:
+          type: integer
+        scheduledAt:
+          type: string
+          format: date-time
+        status:
+          $ref: '#/components/schemas/ChallengeStatus'
+
+    CreateRoundRequest:
+      type: object
+      required: [type, title, prompt, timeLimitSeconds, maxPoints, order]
+      properties:
+        type:
+          $ref: '#/components/schemas/RoundType'
+        title:
+          type: string
+        description:
+          type: string
+        prompt:
+          type: string
+        timeLimitSeconds:
+          type: integer
+        maxPoints:
+          type: integer
+        order:
+          type: integer
+
+    SubmissionType:
+      type: string
+      enum: [text, file]
+
+    Submission:
+      type: object
+      required: [id, challengeId, roundId, teamId, userId, type, submittedAt]
+      properties:
+        id:
+          type: string
+        challengeId:
+          type: string
+        roundId:
+          type: string
+        teamId:
+          type: string
+        userId:
+          type: string
+        type:
+          $ref: '#/components/schemas/SubmissionType'
+        textContent:
+          type:
+            - string
+            - 'null'
+        fileUrl:
+          type:
+            - string
+            - 'null'
+        fileName:
+          type:
+            - string
+            - 'null'
+        submittedAt:
+          type: string
+          format: date-time
+
+    SubmitAnswerRequest:
+      type: object
+      required: [challengeId, roundId, teamId, type]
+      properties:
+        challengeId:
+          type: string
+        roundId:
+          type: string
+        teamId:
+          type: string
+        type:
+          $ref: '#/components/schemas/SubmissionType'
+        textContent:
+          type: string
+
+    LeaderboardEntry:
+      type: object
+      required: [rank, team, totalPoints, weeklyPoints, wins, losses, streak, trend, pointHistory]
+      properties:
+        rank:
+          type: integer
+        team:
+          $ref: '#/components/schemas/Team'
+        totalPoints:
+          type: integer
+        weeklyPoints:
+          type: integer
+        wins:
+          type: integer
+        losses:
+          type: integer
+        streak:
+          type: integer
+        trend:
+          type: string
+          enum: [up, down, same]
+        pointHistory:
+          type: array
+          items:
+            type: integer
+
+    IndividualRanking:
+      type: object
+      required: [rank, user, totalPoints, teamName]
+      properties:
+        rank:
+          type: integer
+        user:
+          $ref: '#/components/schemas/User'
+        totalPoints:
+          type: integer
+        teamName:
+          type: string
+
+    Score:
+      type: object
+      required: [id, challengeId, roundId, teamId, points, enteredBy, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+        challengeId:
+          type: string
+        roundId:
+          type: string
+        teamId:
+          type: string
+        points:
+          type: integer
+        enteredBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateScoreRequest:
+      type: object
+      required: [challengeId, roundId, teamId, points]
+      properties:
+        challengeId:
+          type: string
+        roundId:
+          type: string
+        teamId:
+          type: string
+        points:
+          type: integer
+
+    UpdateScoreRequest:
+      type: object
+      required: [points]
+      properties:
+        points:
+          type: integer
+
+    AwardCategory:
+      type: string
+      enum:
+        - academic_mvp
+        - best_teacher
+        - quick_thinker
+        - most_improved
+        - team_player
+        - rising_star
+
+    Award:
+      type: object
+      required: [id, category, title, description, icon]
+      properties:
+        id:
+          type: string
+        category:
+          $ref: '#/components/schemas/AwardCategory'
+        title:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+
+    CreateAwardRequest:
+      type: object
+      required: [category, title, description, icon]
+      properties:
+        category:
+          $ref: '#/components/schemas/AwardCategory'
+        title:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+
+    AwardWinner:
+      type: object
+      required: [id, award, user, weekNumber, reason, awardedAt]
+      properties:
+        id:
+          type: string
+        award:
+          $ref: '#/components/schemas/Award'
+        user:
+          $ref: '#/components/schemas/User'
+        weekNumber:
+          type: integer
+        reason:
+          type: string
+        awardedAt:
+          type: string
+          format: date-time
+
+    NominateAwardRequest:
+      type: object
+      required: [nomineeId, reason]
+      properties:
+        nomineeId:
+          type: string
+        reason:
+          type: string
+
+    DeclareWinnerRequest:
+      type: object
+      required: [userId, weekNumber, reason]
+      properties:
+        userId:
+          type: string
+        weekNumber:
+          type: integer
+        reason:
+          type: string
+
+    NotificationType:
+      type: string
+      enum:
+        - mission_published
+        - challenge_starting
+        - challenge_ended
+        - score_update
+        - award_received
+        - team_update
+        - system
+
+    Notification:
+      type: object
+      required: [id, userId, type, title, message, isRead, data, createdAt]
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        type:
+          $ref: '#/components/schemas/NotificationType'
+        title:
+          type: string
+        message:
+          type: string
+        isRead:
+          type: boolean
+        data:
+          type: object
+          additionalProperties: true
+        createdAt:
+          type: string
+          format: date-time
+
+    Season:
+      type: object
+      required: [id, name, startDate, endDate, currentWeek, totalWeeks, isActive]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        currentWeek:
+          type: integer
+        totalWeeks:
+          type: integer
+        isActive:
+          type: boolean
+
+    UpdateSeasonRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        currentWeek:
+          type: integer
+        totalWeeks:
+          type: integer
+        isActive:
+          type: boolean
+
+x-socketio-events:
+  namespace: /
+  clientEmits:
+    - event: authenticate
+      payload:
+        type: object
+        required: [token]
+        properties:
+          token:
+            type: string
+    - event: timer:requestSync
+      payload:
+        type: object
+        additionalProperties: false
+  serverEmits:
+    - event: leaderboard:update
+      payload:
+        type: array
+        items:
+          $ref: '#/components/schemas/LeaderboardEntry'
+    - event: challenge:started
+      payload:
+        type: object
+        required: [challengeId, roundId, endsAt]
+        properties:
+          challengeId:
+            type: string
+          roundId:
+            type: string
+          endsAt:
+            type: string
+            format: date-time
+    - event: challenge:tick
+      payload:
+        type: object
+        required: [remainingSeconds]
+        properties:
+          remainingSeconds:
+            type: integer
+    - event: challenge:ended
+      payload:
+        type: object
+        required: [challengeId, results]
+        properties:
+          challengeId:
+            type: string
+          results:
+            type: array
+            items:
+              $ref: '#/components/schemas/LeaderboardEntry'
+    - event: score:update
+      payload:
+        type: object
+        required: [teamId, roundId, points, totalPoints]
+        properties:
+          teamId:
+            type: string
+          roundId:
+            type: string
+          points:
+            type: integer
+          totalPoints:
+            type: integer
+    - event: notification:new
+      payload:
+        $ref: '#/components/schemas/Notification'
+    - event: timer:sync
+      payload:
+        type: object
+        required: [remainingSeconds, serverTime]
+        properties:
+          remainingSeconds:
+            type: integer
+          serverTime:
+            type: string
+            format: date-time

@@ -1,0 +1,397 @@
+@import 'tailwindcss';
+
+/* ============================================================
+   MIVA Study League — Global Styles & Theme System
+   ============================================================ */
+
+/* ---------- Theme: MIVA Classic (default) ---------- */
+:root,
+[data-theme='miva-classic'] {
+  --theme-color-primary: #e53935;
+  --theme-color-primary-hover: #c62828;
+  --theme-color-primary-light: #ff6f60;
+  --theme-color-primary-foreground: #ffffff;
+  --theme-color-secondary: #1e3a5f;
+  --theme-color-secondary-foreground: #f8fafc;
+  --theme-color-accent: #f9a825;
+  --theme-color-bg-icon: #0a3150;
+  --theme-color-bg: #ffffff;
+  --theme-color-bg-secondary: #f8fafc;
+  --theme-color-bg-card: #ffffff;
+  --theme-color-bg-elevated: #ffffff;
+  --theme-color-surface: #f1f5f9;
+  --theme-color-border: #e2e8f0;
+  --theme-color-text: #0f172a;
+  --theme-color-text-secondary: #64748b;
+  --theme-color-text-muted: #94a3b8;
+  --theme-color-glow: rgba(229, 57, 53, 0.3);
+  --theme-color-gradient-start: #e53935;
+  --theme-color-gradient-end: #1e3a5f;
+  --theme-font-heading: 'Manrope', sans-serif;
+  --theme-font-body: 'Inter', sans-serif;
+  --theme-radius-card: 12px;
+  --theme-radius-button: 8px;
+  --theme-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --theme-shadow-elevated: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='miva-classic'].dark {
+  --theme-color-primary-foreground: #ffffff;
+  --theme-color-secondary-foreground: #f8fafc;
+  --theme-color-bg: #0b1120;
+  --theme-color-bg-secondary: #111827;
+  --theme-color-bg-card: #1e293b;
+  --theme-color-bg-elevated: #1e293b;
+  --theme-color-surface: #1e293b;
+  --theme-color-border: #334155;
+  --theme-color-text: #f8fafc;
+  --theme-color-text-secondary: #94a3b8;
+  --theme-color-text-muted: #64748b;
+  --theme-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --theme-shadow-elevated: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+}
+
+/* ---------- Theme: Cyberpunk Neon ---------- */
+[data-theme='cyberpunk'] {
+  --theme-color-primary: #00e5ff;
+  --theme-color-primary-hover: #00b8d4;
+  --theme-color-primary-light: #18ffff;
+  --theme-color-primary-foreground: #04131a;
+  --theme-color-secondary: #e040fb;
+  --theme-color-secondary-foreground: #12061f;
+  --theme-color-accent: #76ff03;
+  --theme-color-bg: #0a0a0f;
+  --theme-color-bg-secondary: #12121a;
+  --theme-color-bg-card: #1a1a2e;
+  --theme-color-bg-elevated: #1a1a2e;
+  --theme-color-surface: #16213e;
+  --theme-color-border: #2a2a4a;
+  --theme-color-text: #e0e0e0;
+  --theme-color-text-secondary: #9e9e9e;
+  --theme-color-text-muted: #616161;
+  --theme-color-glow: rgba(0, 229, 255, 0.4);
+  --theme-color-gradient-start: #00e5ff;
+  --theme-color-gradient-end: #e040fb;
+  --theme-font-heading: 'Orbitron', sans-serif;
+  --theme-font-body: 'Rajdhani', sans-serif;
+  --theme-radius-card: 4px;
+  --theme-radius-button: 4px;
+  --theme-shadow-card: 0 0 15px rgba(0, 229, 255, 0.1);
+  --theme-shadow-elevated: 0 0 30px rgba(0, 229, 255, 0.2);
+}
+
+[data-theme='cyberpunk'].dark {
+  --theme-color-primary-foreground: #04131a;
+  --theme-color-secondary-foreground: #12061f;
+  --theme-color-bg: #050508;
+  --theme-color-bg-secondary: #0a0a12;
+  --theme-color-bg-card: #111125;
+  --theme-color-bg-elevated: #111125;
+  --theme-color-surface: #0d1b3e;
+  --theme-color-border: #1f1f3f;
+}
+
+/* ---------- Theme: Gradient Playful ---------- */
+[data-theme='gradient-playful'] {
+  --theme-color-primary: #8b5cf6;
+  --theme-color-primary-hover: #7c3aed;
+  --theme-color-primary-light: #a78bfa;
+  --theme-color-primary-foreground: #ffffff;
+  --theme-color-secondary: #ec4899;
+  --theme-color-secondary-foreground: #2a1234;
+  --theme-color-accent: #f59e0b;
+  --theme-color-bg: #fefbff;
+  --theme-color-bg-secondary: #faf5ff;
+  --theme-color-bg-card: rgba(255, 255, 255, 0.7);
+  --theme-color-bg-elevated: rgba(255, 255, 255, 0.85);
+  --theme-color-surface: #f5f3ff;
+  --theme-color-border: rgba(139, 92, 246, 0.15);
+  --theme-color-text: #1e1b4b;
+  --theme-color-text-secondary: #6b7280;
+  --theme-color-text-muted: #9ca3af;
+  --theme-color-glow: rgba(139, 92, 246, 0.3);
+  --theme-color-gradient-start: #8b5cf6;
+  --theme-color-gradient-end: #ec4899;
+  --theme-font-heading: 'Manrope', sans-serif;
+  --theme-font-body: 'Inter', sans-serif;
+  --theme-radius-card: 20px;
+  --theme-radius-button: 14px;
+  --theme-shadow-card: 0 4px 20px rgba(139, 92, 246, 0.08);
+  --theme-shadow-elevated: 0 8px 40px rgba(139, 92, 246, 0.12);
+}
+
+[data-theme='gradient-playful'].dark {
+  --theme-color-primary-foreground: #ffffff;
+  --theme-color-secondary-foreground: #2a1234;
+  --theme-color-bg: #0f0a1a;
+  --theme-color-bg-secondary: #1a1028;
+  --theme-color-bg-card: rgba(30, 20, 50, 0.8);
+  --theme-color-bg-elevated: rgba(30, 20, 50, 0.9);
+  --theme-color-surface: #1e1538;
+  --theme-color-border: rgba(139, 92, 246, 0.25);
+  --theme-color-text: #f0e6ff;
+  --theme-color-text-secondary: #a78bfa;
+  --theme-color-text-muted: #7c6fad;
+}
+
+/* ---------- Theme: Esports Arena ---------- */
+[data-theme='esports'] {
+  --theme-color-primary: #ff4444;
+  --theme-color-primary-hover: #cc0000;
+  --theme-color-primary-light: #ff6b6b;
+  --theme-color-primary-foreground: #ffffff;
+  --theme-color-secondary: #ff8800;
+  --theme-color-secondary-foreground: #1a1a1a;
+  --theme-color-accent: #ffe600;
+  --theme-color-bg: #0d0d0d;
+  --theme-color-bg-secondary: #141414;
+  --theme-color-bg-card: #1a1a1a;
+  --theme-color-bg-elevated: #222222;
+  --theme-color-surface: #1a1a1a;
+  --theme-color-border: #333333;
+  --theme-color-text: #ffffff;
+  --theme-color-text-secondary: #b0b0b0;
+  --theme-color-text-muted: #666666;
+  --theme-color-glow: rgba(255, 68, 68, 0.4);
+  --theme-color-gradient-start: #ff4444;
+  --theme-color-gradient-end: #ff8800;
+  --theme-font-heading: 'Rajdhani', sans-serif;
+  --theme-font-body: 'Inter', sans-serif;
+  --theme-radius-card: 2px;
+  --theme-radius-button: 2px;
+  --theme-shadow-card: 0 2px 8px rgba(255, 68, 68, 0.1);
+  --theme-shadow-elevated: 0 4px 20px rgba(255, 68, 68, 0.15);
+}
+
+[data-theme='esports'].dark {
+  --theme-color-primary-foreground: #ffffff;
+  --theme-color-secondary-foreground: #1a1a1a;
+  --theme-color-bg: #050505;
+  --theme-color-bg-secondary: #0a0a0a;
+  --theme-color-bg-card: #111111;
+  --theme-color-bg-elevated: #181818;
+  --theme-color-surface: #111111;
+  --theme-color-border: #252525;
+}
+
+/* ============================================================
+   Global Base Styles
+   ============================================================ */
+@theme inline {
+  --color-primary: var(--theme-color-primary);
+  --color-primary-hover: var(--theme-color-primary-hover);
+  --color-primary-light: var(--theme-color-primary-light);
+  --color-primary-foreground: var(--theme-color-primary-foreground);
+  --color-secondary: var(--theme-color-secondary);
+  --color-secondary-foreground: var(--theme-color-secondary-foreground);
+  --color-accent: var(--theme-color-accent);
+  --color-bg: var(--theme-color-bg);
+  --color-background: var(--theme-color-bg);
+  --color-bg-secondary: var(--theme-color-bg-secondary);
+  --color-bg-card: var(--theme-color-bg-card);
+  --color-bg-elevated: var(--theme-color-bg-elevated);
+  --color-surface: var(--theme-color-surface);
+  --color-border: var(--theme-color-border);
+  --color-foreground: var(--theme-color-text);
+  --color-text: var(--theme-color-text);
+  --color-text-secondary: var(--theme-color-text-secondary);
+  --color-text-muted: var(--theme-color-text-muted);
+  --color-muted-foreground: var(--theme-color-text-secondary);
+}
+
+/* Ensure foreground aliases exist even when utility token extraction is selective. */
+:root,
+[data-theme='miva-classic'],
+[data-theme='cyberpunk'],
+[data-theme='gradient-playful'],
+[data-theme='esports'] {
+  --color-primary-foreground: var(--theme-color-primary-foreground);
+  --color-secondary: var(--theme-color-secondary);
+  --color-secondary-foreground: var(--theme-color-secondary-foreground);
+  --color-foreground: var(--theme-color-text);
+  --color-muted-foreground: var(--theme-color-text-secondary);
+  --color-background: var(--theme-color-bg);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--theme-font-body);
+  background-color: var(--theme-color-bg);
+  color: var(--theme-color-text);
+  min-height: 100vh;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--theme-font-heading);
+}
+
+::selection {
+  background-color: var(--theme-color-primary);
+  color: white;
+}
+
+/* ---------- Custom Scrollbar ---------- */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--theme-color-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--theme-color-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--theme-color-text-muted);
+}
+
+/* ---------- Animations ---------- */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 5px var(--theme-color-glow);
+  }
+  50% {
+    box-shadow:
+      0 0 20px var(--theme-color-glow),
+      0 0 40px var(--theme-color-glow);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes border-glow {
+  0%,
+  100% {
+    border-color: var(--theme-color-primary);
+  }
+  50% {
+    border-color: var(--theme-color-secondary);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+  background-size: 200% 100%;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.6s ease-out;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
+/* ---------- Glassmorphism Utility ---------- */
+.glass {
+  background: var(--theme-color-bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--theme-color-border);
+}
+
+/* ---------- Gradient text utility ---------- */
+.text-gradient {
+  background: linear-gradient(
+    135deg,
+    var(--theme-color-gradient-start),
+    var(--theme-color-gradient-end)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@keyframes scroll-x {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+.animate-scroll-x {
+  animation: scroll-x 30s linear infinite;
+}
+
+.animate-scroll-x:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse-glow,
+  .animate-float,
+  .animate-spin-slow,
+  .animate-scroll-x {
+    animation: none !important;
+  }
+}

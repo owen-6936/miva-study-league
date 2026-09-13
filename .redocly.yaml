@@ -1,0 +1,14 @@
+apis:
+  miva-study-league@v1:
+    root: docs/api/openapi.yaml
+
+extends:
+  - minimal
+
+rules:
+  # Keep CI focused on contract validity over style strictness.
+  operation-4xx-response: off
+  operation-operationId: off
+  operation-operationId-unique: off
+  operation-summary: off
+  no-empty-servers: off

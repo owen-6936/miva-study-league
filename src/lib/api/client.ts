@@ -44,7 +44,8 @@ apiClient.interceptors.request.use(
   (config) => {
     const token = useAuthStore.getState().accessToken;
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      // Use Axios 1.x Header API to ensure the header is properly injected
+      config.headers.set('Authorization', `Bearer ${token}`);
     }
     return config;
   },

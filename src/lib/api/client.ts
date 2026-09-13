@@ -107,9 +107,13 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
+        // The backend uses an HttpOnly cookie for the refresh token, so the browser
+        // automatically attaches it via `withCredentials: true`. No body payload is needed!
         const { data } = await axios.post(`${API_URL}/auth/refresh`, {}, { withCredentials: true });
+        
         const newAccessToken = data.token || data.accessToken || data.data?.accessToken;
-
+        
+        // We leave the refreshToken empty here because the backend handles it via res.cookie
         useAuthStore.getState().setTokens(newAccessToken, '');
 
         processQueue(null, newAccessToken);

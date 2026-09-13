@@ -6,7 +6,8 @@ export const useAuth = () => {
 
   const login = async (email: string, password: string) => {
     const res = await apiClient.post('/auth/login', { email, password });
-    setAuth(res.data.user, res.data.accessToken, res.data.refreshToken);
+    const accessToken = res.data.token || res.data.accessToken;
+    setAuth(res.data.user, accessToken, res.data.refreshToken);
     return res;
   };
 

@@ -35,6 +35,13 @@ Expected refresh response shape consumed by frontend interceptor:
 - data.refreshToken
 
 ## Domain Endpoint Groups
+
+- Timetable
+  - GET /timetable
+  - POST /timetable
+  - PUT /timetable/{id}
+  - DELETE /timetable/{id}
+
 - Users
   - GET /users
   - GET /users/{id}

@@ -1,6 +1,9 @@
 import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
+import { useState, useEffect } from 'react';
+import { apiClient } from '@/lib/api/client';
 import { useAuthStore } from '@/lib/stores/auth-store';
+import type { User } from '@/lib/api/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,28 +11,77 @@ import { TEAM_EMOJIS, getInitials, formatNumber } from '@/lib/utils';
 import { Trophy, Star, Activity, Settings, Edit3, Target } from 'lucide-react';
 import { Link } from 'react-router';
 
-const MOCK_ACTIVITY = [
-  { id: 1, action: 'Completed Mission', subject: 'Math Wars', points: '+150', date: '2 hours ago' },
+
+
+
+export interface ProfileActivity {
+  id: string;
+  action?: string;
+  type?: string;
+  subject?: string;
+  description?: string;
+  points?: string;
+  pointsEarned?: number | string;
+  date?: string;
+  createdAt?: string;
+}
+
+const ACHIEVEMENTS = [
   {
-    id: 2,
-    action: 'Answered correctly',
-    subject: 'Quick Fire Round',
-    points: '+25',
-    date: '1 day ago',
+    id: 'registered',
+    title: 'League Initiate',
+    description: 'Registered for the MIVA Study League',
+    emoji: '🎓',
+    colorClass: 'bg-blue-100 border-blue-200 dark:bg-blue-900/30 dark:border-blue-800',
+    isEarned: (user: User | null) => !!user,
   },
   {
-    id: 3,
-    action: 'Earned Achievement',
-    subject: 'Speed Demon',
-    points: '+500',
-    date: '3 days ago',
+    id: 'joined_team',
+    title: 'Team Player',
+    description: 'Joined a team in the League',
+    emoji: '🤝',
+    colorClass: 'bg-purple-100 border-purple-200 dark:bg-purple-900/30 dark:border-purple-800',
+    isEarned: (user: User | null) => !!user?.teamId,
   },
-  { id: 4, action: 'Joined Team', subject: 'Alpha', points: '0', date: '2 weeks ago' },
+  {
+    id: 'first_mission',
+    title: 'First Blood',
+    description: 'Completed your first mission',
+    emoji: '🩸',
+    colorClass: 'bg-red-100 border-red-200 dark:bg-red-900/30 dark:border-red-800',
+    isEarned: (user: User | null) => (user?.totalPoints || 0) > 0,
+  }
 ];
 
 export function Profile() {
   const { user } = useAuthStore();
-  const teamName = user?.team || 'Alpha';
+  const teamName = user?.team || 'Unknown';
+  const [rank, setRank] = useState<number | null>(null);
+  const [activities, setActivities] = useState<ProfileActivity[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await apiClient.get('/leaderboard');
+        const data = res.data.leaderboard || res.data;
+        const allUsers = data.topUsers || [];
+        if (user?.id) {
+          const userRank = allUsers.findIndex((u: User & { _id?: string }) => u.id === user.id || u._id === user.id) + 1;
+          setRank(userRank > 0 ? userRank : null);
+        }
+      } catch (err) {
+        console.error('Failed to load leaderboard', err);
+      }
+      
+      try {
+        const actRes = await apiClient.get('/activities');
+        setActivities(actRes.data.activities || []);
+      } catch (err) {
+        console.error('Failed to load activities', err);
+      }
+    };
+    fetchData();
+  }, [user?.id]);
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-8">
@@ -56,7 +108,7 @@ export function Profile() {
 
           <div className="flex flex-wrap justify-center md:justify-start gap-2">
             <Badge variant="default" className="text-sm py-1 px-3">
-              ID: {user?.id || 'MIVA-1042'}
+              ID: {user?.matricNumber || 'Unknown'}
             </Badge>
             <Badge className="text-sm py-1 px-3 bg-primary/10 text-primary hover:bg-primary/20 border-0 flex items-center gap-1">
               {TEAM_EMOJIS[teamName]} Team {teamName}
@@ -86,21 +138,21 @@ export function Profile() {
                   <Star className="w-5 h-5 text-yellow-500" />
                   <span className="font-medium">Total Points</span>
                 </div>
-                <span className="font-bold text-lg">{formatNumber(1250)}</span>
+                <span className="font-bold text-lg">{formatNumber(user?.totalPoints || 0)}</span>
               </div>
               <div className="flex justify-between items-center p-3 bg-secondary/30 rounded-lg">
                 <div className="flex items-center gap-3">
                   <Trophy className="w-5 h-5 text-primary" />
                   <span className="font-medium">Global Rank</span>
                 </div>
-                <span className="font-bold text-lg">#42</span>
+                <span className="font-bold text-lg">{rank ? `#${rank}` : '-'} </span>
               </div>
               <div className="flex justify-between items-center p-3 bg-secondary/30 rounded-lg">
                 <div className="flex items-center gap-3">
                   <Target className="w-5 h-5 text-green-500" />
                   <span className="font-medium">Missions</span>
                 </div>
-                <span className="font-bold text-lg">14/15</span>
+                <span className="font-bold text-lg">-</span>
               </div>
             </CardContent>
           </Card>
@@ -111,36 +163,23 @@ export function Profile() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-3">
-                <div
-                  className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center text-xl shadow-sm border border-yellow-200"
-                  title="First Blood"
-                >
-                  🩸
-                </div>
-                <div
-                  className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-xl shadow-sm border border-blue-200"
-                  title="Speed Demon"
-                >
-                  ⚡
-                </div>
-                <div
-                  className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-xl shadow-sm border border-purple-200"
-                  title="Team Player"
-                >
-                  🤝
-                </div>
-                <div
-                  className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-xl shadow-sm border border-gray-200 opacity-50"
-                  title="Locked"
-                >
-                  🔒
-                </div>
-                <div
-                  className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-xl shadow-sm border border-gray-200 opacity-50"
-                  title="Locked"
-                >
-                  🔒
-                </div>
+                {ACHIEVEMENTS.map((achievement) => {
+                  const earned = achievement.isEarned(user);
+                  return (
+                    <div
+                      key={achievement.id}
+                      className={cn(
+                        "w-12 h-12 rounded-full flex items-center justify-center text-xl shadow-sm border transition-all cursor-help",
+                        earned 
+                          ? achievement.colorClass 
+                          : "bg-secondary/50 border-border opacity-50 grayscale hover:grayscale-0 hover:opacity-80"
+                      )}
+                      title={`${achievement.title} - ${achievement.description}${!earned ? ' (Locked)' : ''}`}
+                    >
+                      {earned ? achievement.emoji : '🔒'}
+                    </div>
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
@@ -156,7 +195,8 @@ export function Profile() {
             </CardHeader>
             <CardContent>
               <div className="relative border-l border-muted ml-3 space-y-8 pb-4">
-                {MOCK_ACTIVITY.map((item, i) => (
+                {activities.length === 0 && <p className="text-muted-foreground text-sm">No recent activity found.</p>}
+                {activities.map((item, i) => (
                   <motion.div
                     key={item.id}
                     initial={{ opacity: 1, x: 20 }}
@@ -166,18 +206,18 @@ export function Profile() {
                   >
                     <span className="absolute -left-[5px] top-1.5 w-[10px] h-[10px] rounded-full bg-primary ring-4 ring-background" />
                     <div className="flex justify-between items-start mb-1">
-                      <h4 className="font-semibold text-sm">{item.action}</h4>
-                      <span className="text-xs text-muted-foreground">{item.date}</span>
+                      <h4 className="font-semibold text-sm">{item.action || item.type || 'Activity'}</h4>
+                      <span className="text-xs text-muted-foreground">{item.date || (item.createdAt ? new Date(item.createdAt).toLocaleDateString() : '')}</span>
                     </div>
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-muted-foreground">{item.subject}</span>
+                      <span className="text-muted-foreground">{item.subject || item.description || ''}</span>
                       <span
                         className={cn(
                           'font-bold font-mono',
-                          item.points !== '0' ? 'text-green-500' : 'text-muted-foreground',
+                          (item.points || item.pointsEarned) ? 'text-green-500' : 'text-muted-foreground',
                         )}
                       >
-                        {item.points !== '0' ? item.points : '-'}
+                        {item.points ? `+${item.points}` : (item.pointsEarned ? `+${item.pointsEarned}` : '-')}
                       </span>
                     </div>
                   </motion.div>

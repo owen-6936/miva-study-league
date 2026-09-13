@@ -66,6 +66,7 @@ Users with the `admin` role have access to the `/admin` route which includes:
 - **Mission Management** (Create/delete missions)
 - **Team Management** (Edit team points, drop teams)
 - **User Management** (Assign teams, allocate transfer tokens)
+- **Timetable Management** (Add, edit, import school schedules via REST API)
 
 ---
 *Powered by Miva Star Owen*

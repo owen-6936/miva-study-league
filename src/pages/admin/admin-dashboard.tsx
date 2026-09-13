@@ -201,6 +201,23 @@ export function AdminDashboardPage() {
 
             <Card className="hover:border-primary/50 transition-colors">
               <CardContent className="p-6 flex flex-col items-start gap-4">
+                <div className="p-3 bg-purple-500/10 rounded-lg text-purple-500">
+                  <Calendar className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg mb-1">Timetable</h3>
+                  <p className="text-sm text-muted-foreground mb-4">Update the school schedule.</p>
+                  <Link to="/admin/timetable" className="w-full flex-1">
+                    <Button variant="outline" className="w-full">
+                      Manage Timetable
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:border-primary/50 transition-colors">
+              <CardContent className="p-6 flex flex-col items-start gap-4">
                 <div className="p-3 bg-green-500/10 rounded-lg text-green-500">
                   <Users className="h-6 w-6" />
                 </div>

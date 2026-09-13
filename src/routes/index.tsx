@@ -44,6 +44,7 @@ const HallOfFame = lazy(() =>
 );
 const Profile = lazy(() => import('@/pages/profile').then((m) => ({ default: m.Profile })));
 const Settings = lazy(() => import('@/pages/settings').then((m) => ({ default: m.Settings })));
+const Timetable = lazy(() => import('@/pages/timetable').then((m) => ({ default: m.Timetable })));
 
 const AdminDashboard = lazy(() =>
   import('@/pages/admin/admin-dashboard').then((m) => ({ default: m.AdminDashboardPage })),
@@ -62,6 +63,9 @@ const AdminChallenges = lazy(() =>
 );
 const AdminScores = lazy(() =>
   import('@/pages/admin/admin-scores').then((m) => ({ default: m.AdminScoresPage })),
+);
+const AdminTimetable = lazy(() =>
+  import('@/pages/admin/admin-timetable').then((m) => ({ default: m.AdminTimetablePage })),
 );
 const NotFound = lazy(() => import('@/pages/not-found').then((m) => ({ default: m.NotFound })));
 
@@ -159,6 +163,7 @@ export const AppRoutes = () => {
           <Route path="/hall-of-fame" element={<HallOfFame />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/timetable" element={<Timetable />} />
 
           {/* Admin Routes */}
           <Route
@@ -206,6 +211,14 @@ export const AppRoutes = () => {
             element={
               <AdminRoute>
                 <AdminScores />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/timetable"
+            element={
+              <AdminRoute>
+                <AdminTimetable />
               </AdminRoute>
             }
           />

@@ -10,7 +10,7 @@ export const useAuth = () => {
     return res;
   };
 
-  const register = async (data: any) => {
+  const register = async (data: { email: string; fullName: string; matricNumber: string }) => {
     const res = await apiClient.post('/auth/register', data);
     return res;
   };

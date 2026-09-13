@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link, useLocation } from 'react-router';
+import { ThemeSwitcher } from '@/components/ui/theme-switcher';
 import {
   Bell,
   User,
-  Sun,
-  Moon,
   Menu,
   X,
   LogOut,
@@ -19,7 +18,6 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { useNotificationStore } from '@/lib/stores/notification-store';
-import { useThemeStore } from '@/lib/stores/theme-store';
 import { cn } from '@/lib/utils';
 
 const NAV_LINKS = [
@@ -39,7 +37,6 @@ export const Navbar = () => {
 
   const { user, isAuthenticated, logout } = useAuthStore();
   const unreadCount = useNotificationStore((state) => state.unreadCount);
-  const { isDark, toggleDark } = useThemeStore();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -115,12 +112,7 @@ export const Navbar = () => {
         )}
 
         <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
-          <button
-            onClick={toggleDark}
-            className="p-2 rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground"
-          >
-            {isDark ? <Sun size={20} /> : <Moon size={20} />}
-          </button>
+          <ThemeSwitcher />
 
           {isAuthenticated ? (
             <>

@@ -32,7 +32,9 @@ export function AdminDashboardPage() {
       // If it returns an array or an object
       const data = res.data.season || res.data.seasons?.[0] || res.data[0] || res.data;
       if (data && data.academicStartDate) {
-        setSeason(data);
+        // Sanitize the ID if it comes back as _id
+        const sanitized = { ...data, id: data.id || data._id };
+        setSeason(sanitized);
         setStartDate(data.academicStartDate.split('T')[0]); // Just get YYYY-MM-DD
         setSeasonNumber(data.seasonNumber || 1);
         setTotalWeeks(data.totalWeeks || 12);
@@ -46,22 +48,22 @@ export function AdminDashboardPage() {
   let weekLabel = '⚠️ Configure Season';
   if (season) {
     if (season.isActive === false) {
-      weekLabel = `Season ${season.name} • Paused`;
+      weekLabel = `Season ${season.seasonNumber} • Paused`;
     } else if (
-      season.startDate &&
-      new Date(season.startDate).getTime() > Date.now()
+      season.academicStartDate &&
+      new Date(season.academicStartDate).getTime() > Date.now()
     ) {
-      weekLabel = `Season ${season.name} • Pre-season`;
+      weekLabel = `Season ${season.seasonNumber} • Pre-season`;
     } else {
       const currentWeek =
         Math.floor(
-          (Date.now() - new Date(season.startDate).getTime()) / (1000 * 60 * 60 * 24 * 7),
+          (Date.now() - new Date(season.academicStartDate).getTime()) / (1000 * 60 * 60 * 24 * 7),
         ) + 1;
       const totalWeeks = season.totalWeeks || 12;
       if (currentWeek > totalWeeks) {
-        weekLabel = `Season ${season.name} • Ended`;
+        weekLabel = `Season ${season.seasonNumber} • Ended`;
       } else {
-        weekLabel = `Season ${season.name} • Week ${currentWeek}`;
+        weekLabel = `Season ${season.seasonNumber} • Week ${currentWeek}`;
       }
     }
   }

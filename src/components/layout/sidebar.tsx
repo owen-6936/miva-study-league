@@ -10,6 +10,7 @@ import {
   Award,
   User,
   Settings,
+  Calendar,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
@@ -20,6 +21,7 @@ const SIDEBAR_ITEMS = [
   { icon: Trophy, label: 'Leaderboard', href: '/leaderboard' },
   { icon: Users, label: 'Teams', href: '/teams' },
   { icon: BookOpen, label: 'Missions', href: '/missions' },
+  { icon: Calendar, label: 'Timetable', href: '/timetable' },
   { icon: Swords, label: 'Challenges', href: '/challenges' },
   { icon: Award, label: 'Hall of Fame', href: '/hall-of-fame' },
   { icon: User, label: 'Profile', href: '/profile', bottom: true },

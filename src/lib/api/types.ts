@@ -299,6 +299,7 @@ export interface Notification {
   createdAt: string;
 }
 
+
 // ---- Season ----
 /** Active season configuration model. */
 export interface Season {
@@ -308,6 +309,25 @@ export interface Season {
   totalWeeks: number;
   isActive: boolean;
 }
+
+// ---- Timetable ----
+/** Days of the week for scheduling. */
+export type DayOfWeek = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday';
+
+/** An individual class or event on the timetable. */
+export interface TimetableEntry {
+  id: string;
+  day: DayOfWeek;
+  date?: string; // Optional specific date (YYYY-MM-DD)
+  startTime: string; // e.g. "09:00 AM"
+  endTime: string; // e.g. "11:00 AM"
+  courseCode: string;
+  title: string;
+  instructor?: string;
+  location?: string; // e.g. "Room 302" or Zoom link
+  type: 'Lecture' | 'Tutorial' | 'Lab' | 'Study Session' | 'Other';
+}
+
 
 // ---- API Response Wrappers ----
 /** Generic successful API envelope with typed data payload. */

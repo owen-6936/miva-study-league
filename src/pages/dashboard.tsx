@@ -104,18 +104,18 @@ export function Dashboard() {
       try {
         const res = await apiClient.get('/leaderboard');
         const data = res.data.leaderboard || res.data;
-        setTopTeams((data.teams || []).slice(0, 3));
+        const allTeams: Team[] = data.teams || [];
+        setTopTeams(allTeams.slice(0, 3));
+        
+        // Calculate team rank dynamically
+        if (useAuthStore.getState().user?.teamId) {
+          const rank = allTeams.findIndex((t) => t.id === useAuthStore.getState().user?.teamId) + 1;
+          setStats(prev => ({ ...prev, teamRank: rank > 0 ? rank : 0 }));
+        }
       } catch (error) {
         console.error('Failed to load leaderboard data', error);
       }
-      try {
-        const statsRes = await apiClient.get('/users/me/stats');
-        if (statsRes.data.stats) {
-          setStats(statsRes.data.stats);
-        }
-      } catch (error) {
-        console.error('Failed to load user stats', error);
-      }
+
       try {
         const missionRes = await apiClient.get('/missions/current');
         const missions = missionRes.data.missions || [];
@@ -248,7 +248,7 @@ export function Dashboard() {
           },
           {
             title: 'Personal Points',
-            value: stats.personalPoints || 0,
+            value: user?.totalPoints || 0,
             icon: Star,
             color: 'text-blue-500',
           },

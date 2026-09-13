@@ -9,6 +9,7 @@ import {
   X,
   LogOut,
   Shield,
+  Calendar,
   LayoutDashboard,
   Trophy,
   Users,
@@ -25,6 +26,7 @@ const NAV_LINKS = [
   { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
   { href: '/teams', label: 'Teams', icon: Users },
   { href: '/missions', label: 'Missions', icon: BookOpen },
+  { href: '/timetable', label: 'Timetable', icon: Calendar },
   { href: '/challenges', label: 'Challenges', icon: Swords },
   { href: '/hall-of-fame', label: 'Hall of Fame', icon: Award },
 ];

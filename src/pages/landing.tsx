@@ -4,6 +4,7 @@ import { Link } from 'react-router';
 import { BookOpen, Swords, Trophy, ChevronRight, ArrowRight } from 'lucide-react';
 import { ParticleBg } from '@/components/ui/particle-bg';
 import { TEAM_EMOJIS } from '@/lib/utils';
+import { ThemeSwitcher } from '@/components/ui/theme-switcher';
 
 export function Landing() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -20,6 +21,7 @@ export function Landing() {
           <span className="font-bold text-xl tracking-tight hidden sm:block">Study League</span>
         </div>
         <div className="flex items-center gap-3 sm:gap-4">
+          <ThemeSwitcher />
           <Link to="/login" className="text-sm font-medium hover:text-primary transition-colors">
             Sign In
           </Link>
@@ -33,7 +35,7 @@ export function Landing() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative min-h-[100svh] flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-svh flex items-center justify-center overflow-hidden">
         <ParticleBg className="absolute inset-0 z-0 opacity-50" />
         <div className="relative z-10 text-center px-4 max-w-5xl mx-auto flex flex-col items-center pt-16 sm:pt-20 md:pt-8">
           <motion.div
@@ -42,7 +44,7 @@ export function Landing() {
             transition={{ duration: 0.8 }}
             className="inline-block px-4 py-1.5 rounded-full bg-surface border border-border text-xs sm:text-sm font-medium mb-6 animate-pulse-glow"
           >
-            Season 1 • 12 Weeks • 7 Teams • 44 Students
+            Season 1 • 12 Weeks • 7 Teams • 100+ Students
           </motion.div>
 
           <div className="mb-5">
@@ -168,7 +170,7 @@ export function Landing() {
       </section>
 
       {/* Teams Preview */}
-      <section className="py-20 sm:py-24 overflow-hidden flex flex-col justify-center min-h-[360px] sm:min-h-[400px]">
+      <section className="py-20 sm:py-24 overflow-hidden flex flex-col justify-center min-h-90 sm:min-h-100">
         <div className="max-w-6xl mx-auto px-4 mb-8 sm:mb-12 text-center">
           <h2 className="text-3xl md:text-5xl font-bold text-gradient">7 Teams. One Goal.</h2>
         </div>
@@ -217,7 +219,7 @@ export function Landing() {
             The Weekly Loop
           </h2>
 
-          <div className="max-w-3xl mx-auto space-y-6 sm:space-y-8 md:space-y-10 relative before:hidden sm:before:block before:absolute before:top-0 before:bottom-0 before:left-5 before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-border before:to-transparent">
+          <div className="max-w-3xl mx-auto space-y-6 sm:space-y-8 md:space-y-10 relative before:hidden sm:before:block before:absolute before:top-0 before:bottom-0 before:left-5 before:w-0.5 before:bg-linear-to-b before:from-transparent before:via-border before:to-transparent">
             <motion.div
               initial={{ y: 20, opacity: 1 }}
               whileInView={{ y: 0, opacity: 1 }}

@@ -157,14 +157,14 @@ export function Dashboard() {
     if (season.isActive === false) {
       weekLabel = 'League on Break';
     } else if (
-      season.startDate &&
-      new Date(season.startDate).getTime() > Date.now()
+      season.academicStartDate &&
+      new Date(season.academicStartDate).getTime() > Date.now()
     ) {
       weekLabel = 'Pre-season (Starts Soon)';
     } else {
       const currentWeek =
         Math.floor(
-          (Date.now() - new Date(season.startDate).getTime()) / (1000 * 60 * 60 * 24 * 7),
+          (Date.now() - new Date(season.academicStartDate).getTime()) / (1000 * 60 * 60 * 24 * 7),
         ) + 1;
       const totalWeeks = season.totalWeeks || 12;
       if (currentWeek > totalWeeks) {
@@ -184,8 +184,8 @@ export function Dashboard() {
       {/* Pre-season Countdown Banner */}
       {season &&
         season.isActive &&
-        season.startDate &&
-        new Date(season.startDate).getTime() > Date.now() && (
+        season.academicStartDate &&
+        new Date(season.academicStartDate).getTime() > Date.now() && (
           <motion.div
             initial={{ opacity: 1, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -203,7 +203,7 @@ export function Dashboard() {
               </div>
             </div>
             <div className="bg-background px-4 py-2 rounded-lg border border-border shadow-inner font-mono text-xl font-bold text-primary">
-              <CountdownTimer targetDate={season.startDate} />
+              <CountdownTimer targetDate={season.academicStartDate} />
             </div>
           </motion.div>
         )}

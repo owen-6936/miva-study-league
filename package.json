@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "MIVA Study League — Gamified Academic Competition Platform for MIVA Open University",
+  "description": "MIVA Study League \u2014 Gamified Academic Competition Platform for MIVA Open University",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

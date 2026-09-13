@@ -303,10 +303,8 @@ export interface Notification {
 /** Active season configuration model. */
 export interface Season {
   id: string;
-  name: string;
-  startDate: string;
-  endDate: string;
-  currentWeek: number;
+  seasonNumber: number;
+  academicStartDate: string;
   totalWeeks: number;
   isActive: boolean;
 }

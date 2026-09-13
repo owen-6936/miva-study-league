@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "MIVA Study League \u2014 Gamified Academic Competition Platform for MIVA Open University",
+  "description": "MIVA Study League — Gamified Academic Competition Platform for MIVA Open University",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -18,6 +18,7 @@
   "dependencies": {
     "@gsap/react": "^2.1.0",
     "@hookform/resolvers": "^5.0.0",
+    "@vercel/analytics": "^2.0.1",
     "axios": "^1.9.0",
     "clsx": "^2.1.0",
     "date-fns": "^4.1.0",

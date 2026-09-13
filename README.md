@@ -1,5 +1,7 @@
 # MIVA Study League - Frontend
 
+🌐 **Live Website:** [https://mivastudyleague.org](https://mivastudyleague.org)
+
 The official React/TypeScript frontend for the MIVA Study League platform.
 
 ## 🚀 Overview

@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link } from 'react-router';
-import { Loader2, CheckCircle2 } from 'lucide-react';
+import { Loader2, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -27,6 +27,11 @@ const registerSchema = z.object({
     .refine((val) => val.endsWith('@miva.edu.ng'), {
       message: 'Must be a valid institutional @miva.edu.ng email.',
     }),
+  password: z.string().min(6, 'Password must be at least 6 characters.'),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ['confirmPassword'],
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -34,11 +39,13 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 export function Register() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [isShake, setIsShake] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { register: registerUser } = useAuth();
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { fullName: '', matricNumber: '', email: '' },
+    defaultValues: { fullName: '', matricNumber: '', email: '', password: '', confirmPassword: '' },
   });
 
   const onSubmit = async (data: RegisterFormValues) => {
@@ -48,6 +55,7 @@ export function Register() {
           email: data.email,
           fullName: data.fullName,
           matricNumber: data.matricNumber,
+          password: data.password,
         });
       }
       setIsSuccess(true);
@@ -170,6 +178,62 @@ export function Register() {
                           {form.formState.errors.email && (
                             <p className="text-xs text-red-500">
                               {form.formState.errors.email.message}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Password</label>
+                          <div className="relative">
+                            <Input
+                              type={showPassword ? "text" : "password"}
+                              placeholder="••••••••"
+                              {...form.register('password')}
+                              className={
+                                form.formState.errors.password
+                                  ? 'border-red-500 focus-visible:ring-red-500 pr-10'
+                                  : 'pr-10'
+                              }
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                          </div>
+                          {form.formState.errors.password && (
+                            <p className="text-xs text-red-500">
+                              {form.formState.errors.password.message}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Confirm Password</label>
+                          <div className="relative">
+                            <Input
+                              type={showConfirmPassword ? "text" : "password"}
+                              placeholder="••••••••"
+                              {...form.register('confirmPassword')}
+                              className={
+                                form.formState.errors.confirmPassword
+                                  ? 'border-red-500 focus-visible:ring-red-500 pr-10'
+                                  : 'pr-10'
+                              }
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                              {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                          </div>
+                          {form.formState.errors.confirmPassword && (
+                            <p className="text-xs text-red-500">
+                              {form.formState.errors.confirmPassword.message}
                             </p>
                           )}
                         </div>

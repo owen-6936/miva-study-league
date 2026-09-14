@@ -1,16 +1,36 @@
 import { useParams, Link } from 'react-router';
 import { motion } from 'motion/react';
 import { useState, useEffect } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CountdownTimer } from '@/components/ui/countdown-timer';
-import { ArrowLeft, Link as LinkIcon, BookOpen, AlertCircle, Send } from 'lucide-react';
+import { ArrowLeft, Link as LinkIcon, BookOpen, AlertCircle, Send, PlayCircle, FileText, Headphones } from 'lucide-react';
 import { apiClient, getApiError } from '@/lib/api/client';
 import { toast } from 'sonner';
 import { PageLoader } from '@/components/ui/page-loader';
-import type { Mission } from '@/lib/api/types';
+import type { Mission, MissionResource } from '@/lib/api/types';
 import { Input } from '@/components/ui/input';
+
+
+const getDrivePreviewUrl = (url: string) => {
+  let parsedUrl = url;
+  if (!parsedUrl.startsWith('http://') && !parsedUrl.startsWith('https://')) {
+    parsedUrl = 'https://' + parsedUrl;
+  }
+  
+  if (parsedUrl.includes('drive.google.com/file/d/')) {
+    return parsedUrl.replace('/view', '/preview').split('?')[0] + '/preview';
+  }
+  if (parsedUrl.includes('youtube.com/watch?v=')) {
+    return parsedUrl.replace('watch?v=', 'embed/').split('&')[0];
+  }
+  if (parsedUrl.includes('youtu.be/')) {
+    return parsedUrl.replace('youtu.be/', 'youtube.com/embed/').split('?')[0];
+  }
+  return parsedUrl;
+};
 
 export function MissionDetailPage() {
   const { missionId } = useParams();
@@ -74,11 +94,14 @@ export function MissionDetailPage() {
         </Button>
       </Link>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        {/* Left Column: Brief & Resources */}
-        <div className="lg:col-span-7 space-y-8">
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+            <Tabs defaultValue="briefing" className="w-full space-y-8">
+        <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto">
+          <TabsTrigger value="briefing" className="gap-2"><BookOpen className="w-4 h-4" /> The Briefing Room</TabsTrigger>
+          <TabsTrigger value="arena" className="gap-2"><Send className="w-4 h-4" /> The Arena (Tasks)</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="briefing" className="space-y-8">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 max-w-4xl mx-auto">
             <div className="flex flex-wrap items-center gap-3">
               <Badge className="bg-primary/20 text-primary hover:bg-primary/30 text-sm py-1 border-primary/20">
                 {mission.courseId}
@@ -97,35 +120,60 @@ export function MissionDetailPage() {
             
             <Card className="border-l-4 border-l-primary bg-primary/5 shadow-sm">
               <CardContent className="p-6">
-                <h3 className="font-bold text-lg mb-4 text-primary font-heading">Mission Briefing</h3>
-                <div className="text-muted-foreground whitespace-pre-line leading-relaxed">
-                  {mission.storyBrief}
-                </div>
+                <p className="text-lg leading-relaxed whitespace-pre-wrap">{mission.storyBrief}</p>
               </CardContent>
             </Card>
           </motion.div>
 
           {mission.resources && mission.resources.length > 0 && (
-            <div className="space-y-4">
+            <div className="space-y-6 max-w-4xl mx-auto mt-12 pt-8 border-t border-border">
               <h2 className="text-2xl font-bold font-heading flex items-center gap-2">
                 <BookOpen className="w-5 h-5 text-primary" /> Intelligence & Resources
               </h2>
-              <div className="grid gap-3">
-                {mission.resources.map((res, i) => (
-                  <a key={i} href={res} target="_blank" rel="noreferrer" className="flex items-center p-4 rounded-xl border bg-surface hover:border-primary/50 hover:shadow-sm transition-all group">
-                    <div className="p-2 bg-secondary rounded-lg group-hover:bg-primary/10 group-hover:text-primary transition-colors mr-4">
-                      <LinkIcon className="w-4 h-4" />
-                    </div>
-                    <span className="font-medium flex-1 truncate">{res}</span>
-                  </a>
+              <div className="grid gap-6">
+                {mission.resources.map((res: MissionResource, i: number) => (
+                  <Card key={i} className="overflow-hidden border border-border bg-surface">
+                    <CardHeader className="bg-secondary/20 pb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-primary/10 text-primary rounded-lg">
+                          {res.type === 'video' ? <PlayCircle className="w-5 h-5" /> : 
+                           res.type === 'audio' ? <Headphones className="w-5 h-5" /> : 
+                           res.type === 'article' ? <LinkIcon className="w-5 h-5" /> : 
+                           <FileText className="w-5 h-5" />}
+                        </div>
+                        <div>
+                          <CardTitle className="text-lg">{res.title || 'Untitled Resource'}</CardTitle>
+                          {res.description && <p className="text-sm text-muted-foreground mt-1">{res.description}</p>}
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                      {(res.type === 'video' || res.type === 'audio') ? (
+                        <div className="w-full aspect-video border-t border-border bg-black/5 flex items-center justify-center">
+                          <iframe 
+                            src={getDrivePreviewUrl(res.url)} 
+                            className="w-full h-full min-h-[300px]"
+                            allow="autoplay; encrypted-media" 
+                            allowFullScreen 
+                          />
+                        </div>
+                      ) : (
+                        <div className="p-6 border-t border-border flex justify-between items-center bg-secondary/5">
+                          <span className="text-sm font-medium text-muted-foreground truncate mr-4">{res.url}</span>
+                          <a href={res.url} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3">
+                            Open Link <LinkIcon className="w-4 h-4 ml-2"/>
+                          </a>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
             </div>
           )}
-        </div>
+        </TabsContent>
 
-        {/* Right Column: Deliverables */}
-        <div className="lg:col-span-5 space-y-6">
+        <TabsContent value="arena" className="max-w-4xl mx-auto">
           <Card className="sticky top-20 border-border">
             <CardHeader className="border-b bg-secondary/30">
               <CardTitle className="flex justify-between items-center">
@@ -231,9 +279,8 @@ export function MissionDetailPage() {
               </div>
             </CardContent>
           </Card>
-        </div>
-
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

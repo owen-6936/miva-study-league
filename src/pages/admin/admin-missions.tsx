@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
-import type { Mission, MissionTask } from '@/lib/api/types';
+import type { Mission, MissionTask, MissionResource } from '@/lib/api/types';
 import type { Column } from '@/components/ui/data-table';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,7 +20,7 @@ export function AdminMissionsPage() {
   const [title, setTitle] = useState('');
   const [courseId, setCourseId] = useState('');
   const [storyBrief, setStoryBrief] = useState('');
-  const [resources, setResources] = useState<string[]>(['']);
+  const [resources, setResources] = useState<MissionResource[]>([]);
   const [tasks, setTasks] = useState<MissionTask[]>([]);
   const [basePoints, setBasePoints] = useState(100);
   const [firstBloodBonus, setFirstBloodBonus] = useState(50);
@@ -45,7 +45,7 @@ export function AdminMissionsPage() {
     setTitle('');
     setCourseId('');
     setStoryBrief('');
-    setResources(['']);
+    setResources([]);
     setTasks([]);
     setBasePoints(100);
     setFirstBloodBonus(50);
@@ -59,7 +59,7 @@ export function AdminMissionsPage() {
     setTitle(mission.title);
     setCourseId(mission.courseId);
     setStoryBrief(mission.storyBrief || '');
-    setResources(mission.resources?.length ? mission.resources : ['']);
+    setResources(mission.resources?.length ? mission.resources : []);
     setTasks(mission.tasks || []);
     setBasePoints(mission.basePoints || 100);
     setFirstBloodBonus(mission.firstBloodBonus || 0);
@@ -76,7 +76,7 @@ export function AdminMissionsPage() {
         title,
         courseId,
         storyBrief,
-        resources: resources.filter(r => r.trim() !== ''),
+        resources: resources.filter(r => r.url.trim() !== ''),
         tasks: tasks.map((t, i) => ({ ...t, order: i + 1 })),
         basePoints,
         firstBloodBonus,
@@ -391,16 +391,50 @@ export function AdminMissionsPage() {
                 <div className="space-y-2 pt-4">
                   <Label>Study Materials / Resources</Label>
                   {resources.map((res, i) => (
-                    <div key={i} className="flex gap-2">
-                      <Input value={res} onChange={e => {
-                        const newRes = [...resources];
-                        newRes[i] = e.target.value;
-                        setResources(newRes);
-                      }} placeholder="https://youtube.com/..." />
-                      <Button variant="ghost" size="sm" onClick={() => setResources(resources.filter((_, idx) => idx !== i))}><X className="w-4 h-4"/></Button>
+                    <div key={i} className="p-4 border border-border rounded-lg bg-secondary/20 relative space-y-3">
+                      <Button variant="destructive" size="sm" className="absolute top-2 right-2 h-6 w-6 p-0" onClick={() => setResources(resources.filter((_, idx) => idx !== i))}><X className="w-4 h-4"/></Button>
+                      <div className="grid grid-cols-2 gap-3 pr-8">
+                        <div className="space-y-1">
+                          <Label className="text-xs">Type</Label>
+                          <select className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm" value={res.type} onChange={e => {
+                            const newRes = [...resources];
+                            if(newRes[i]) newRes[i].type = e.target.value as "article" | "audio" | "document" | "video";
+                            setResources(newRes);
+                          }}>
+                            <option value="video">Video (YouTube / Drive)</option>
+                            <option value="audio">Audio (Podcast / Drive)</option>
+                            <option value="article">Article / Link</option>
+                            <option value="document">Document (PDF)</option>
+                          </select>
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">Title</Label>
+                          <Input className="h-9" value={res.title} onChange={e => {
+                            const newRes = [...resources];
+                            if(newRes[i]) newRes[i].title = e.target.value;
+                            setResources(newRes);
+                          }} placeholder="e.g. Intro to Modulo" required />
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">URL</Label>
+                        <Input className="h-9" value={res.url} onChange={e => {
+                          const newRes = [...resources];
+                          if(newRes[i]) newRes[i].url = e.target.value;
+                          setResources(newRes);
+                        }} placeholder="https://..." required />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Description (Optional)</Label>
+                        <Input className="h-9" value={res.description || ''} onChange={e => {
+                          const newRes = [...resources];
+                          if(newRes[i]) newRes[i].description = e.target.value;
+                          setResources(newRes);
+                        }} placeholder="Brief summary of this resource..." />
+                      </div>
                     </div>
                   ))}
-                  <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => setResources([...resources, ''])}><LinkIcon className="w-4 h-4 mr-2" /> Add Link</Button>
+                  <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => setResources([...resources, { title: '', type: 'video', url: '' }])}><LinkIcon className="w-4 h-4 mr-2" /> Add Resource</Button>
                 </div>
               </CardContent>
             </Card>

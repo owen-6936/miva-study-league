@@ -115,7 +115,15 @@ export function MissionPortalPage() {
               <div className="space-y-3">
                 <h3 className="font-medium">Mission Tasks</h3>
                 <ul className="space-y-2">
-                  <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-primary mt-2" /><span className="text-muted-foreground">{activeMission.storyBrief}</span></li>
+                  {activeMission.tasks?.map((task, idx) => (
+                    <li key={task.id || idx} className="flex items-start gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
+                      <span className="text-muted-foreground">{task.title} <span className="text-xs ml-1 opacity-70">({task.points} XP)</span></span>
+                    </li>
+                  ))}
+                  {(!activeMission.tasks || activeMission.tasks.length === 0) && (
+                    <li className="text-sm text-muted-foreground italic">No tasks specified yet.</li>
+                  )}
                 </ul>
               </div>
             </CardContent>

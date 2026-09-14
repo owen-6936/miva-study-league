@@ -64,6 +64,12 @@ const AdminChallenges = lazy(() =>
 const AdminScores = lazy(() =>
   import('@/pages/admin/admin-scores').then((m) => ({ default: m.AdminScoresPage })),
 );
+const AdminSubmissions = lazy(() =>
+  import('@/pages/admin/admin-submissions').then((m) => ({ default: m.AdminSubmissionsPage })),
+);
+const AdminAnnouncements = lazy(() =>
+  import('@/pages/admin/admin-announcements').then((m) => ({ default: m.AdminAnnouncementsPage })),
+);
 const AdminTimetable = lazy(() =>
   import('@/pages/admin/admin-timetable').then((m) => ({ default: m.AdminTimetablePage })),
 );
@@ -211,6 +217,22 @@ export const AppRoutes = () => {
             element={
               <AdminRoute>
                 <AdminScores />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/submissions"
+            element={
+              <AdminRoute>
+                <AdminSubmissions />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/announcements"
+            element={
+              <AdminRoute>
+                <AdminAnnouncements />
               </AdminRoute>
             }
           />

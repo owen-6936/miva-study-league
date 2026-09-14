@@ -8,6 +8,7 @@ import { cn, TEAM_COLORS, TEAM_EMOJIS, formatNumber } from '@/lib/utils';
 import {
   Trophy,
   Star,
+  Pencil,
   TrendingUp,
   Clock,
   Activity,
@@ -72,7 +73,7 @@ function getRelativeTime(dateString: string) {
 
 export interface DashboardActivity {
   id: string;
-  type: 'mission' | 'join' | 'other';
+  type: 'mission' | 'join' | 'other' | 'MISSION_COMPLETED' | 'MISSION_UPDATED' | string;
   user?: string;
   action?: string;
   target?: string;
@@ -254,6 +255,7 @@ export function Dashboard() {
             title: 'Personal Points',
             value: user?.points || user?.totalPoints || 0,
             icon: Star,
+  Pencil,
             color: 'text-blue-500',
           },
           {
@@ -524,6 +526,14 @@ export function Dashboard() {
                   if (activity.type === 'join') {
                     Icon = Shield;
                     color = 'text-green-500';
+                  }
+                  if (activity.type === 'MISSION_COMPLETED' || activity.action === 'MISSION_COMPLETED') {
+                    Icon = Trophy;
+                    color = 'text-yellow-400';
+                  }
+                  if (activity.type === 'MISSION_UPDATED' || activity.action === 'MISSION_UPDATED') {
+                    Icon = Pencil;
+                    color = 'text-blue-400';
                   }
 
                   return (

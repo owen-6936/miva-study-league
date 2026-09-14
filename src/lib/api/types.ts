@@ -111,6 +111,14 @@ export interface TeamRolesUpdate {
 /** Lifecycle status for missions. */
 export type MissionStatus = 'draft' | 'published' | 'active' | 'completed';
 
+export interface MissionResource {
+  id?: string;
+  title: string;
+  type: 'video' | 'audio' | 'article' | 'document';
+  url: string;
+  description?: string;
+}
+
 /** Individual mission task item. */
 export interface QuizQuestion {
   id: string;
@@ -140,7 +148,7 @@ export interface Mission {
   
   // The B.R.A.D framework
   storyBrief: string;      // The gamified scenario (Markdown supported)
-  resources: string[];     // URLs or Markdown links to study materials
+  resources: MissionResource[]; // Rich media resources for the Briefing Room
   tasks: MissionTask[];    // The actual deliverables
   
   // Loot & Mechanics

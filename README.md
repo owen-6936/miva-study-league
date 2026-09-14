@@ -73,6 +73,13 @@ Users with the `admin` role have access to the `/admin` route which includes:
 
 ## 📦 Changelog
 
+### v1.2.0 (Flipped Classroom Update)
+- **Rich Media Briefing Room**: Upgraded Mission Detail screen with a two-tab interface (`Briefing Room` and `The Arena`).
+- **Smart Embedded Players**: Added automatic iframe embedding for YouTube and Google Drive Audio/Video resources, including a smart URL parsing fallback that auto-prepends `https://`.
+- **Activity Log Simplification**: Refactored the Student Activity Feed and Admin Audit Log to consume a unified `message` string rather than requiring complex multi-part objects.
+- **Mission Resource Schema Update**: Transitioned `Mission.resources` from an array of raw strings to a detailed array of objects (`{ title, type, url, description }`).
+
+
 ### v1.1.0
 - **Dynamic Admin Stats**: The Admin Dashboard now dynamically fetches `Total Users`, `Active Teams`, `Active Missions`, and `Total Submissions` live from the database via `/admin/stats`.
 - **Nested Quiz Architecture**: Rebuilt the mission structure to support multiple nested multiple-choice questions within a single quiz task.

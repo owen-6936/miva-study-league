@@ -39,7 +39,7 @@ const PodiumStep = ({ team, rank }: { team: Team; rank: number }) => {
           {team.name}
         </div>
         <div className={`font-mono text-xs sm:text-sm font-bold ${text}`}>
-          {formatNumber(team.point || 0)}
+          {formatNumber((team.points || team.point || 0))}
         </div>
       </div>
       <motion.div
@@ -67,11 +67,11 @@ export function Leaderboard() {
         const data = res.data.leaderboard || res.data;
 
         const sortedTeams = (data.teams || []).sort(
-          (a: Team, b: Team) => (b.point || 0) - (a.point || 0)
+          (a: Team, b: Team) => ((b.points || b.point || 0) - (a.points || a.point || 0))
         );
 
         const sortedUsers = (data.topUsers || []).sort(
-          (a: User, b: User) => (b.totalPoints || 0) - (a.totalPoints || 0)
+          (a: User, b: User) => ((b.points || b.totalPoints || 0) - (a.points || a.totalPoints || 0))
         );
 
         setTeams(sortedTeams);
@@ -162,7 +162,7 @@ export function Leaderboard() {
                         </div>
                       </td>
                       <td className="px-3 py-3 text-right font-mono font-bold text-primary sm:px-6 sm:py-4">
-                        {formatNumber(team.point)}
+                        {formatNumber(team.points || team.point || 0)}
                       </td>
                     </motion.tr>
                   ))}
@@ -203,20 +203,22 @@ export function Leaderboard() {
                       <td className="px-3 py-3 font-medium sm:px-6 sm:py-4">{student.name}</td>
                       <td className="px-3 py-3 sm:px-6 sm:py-4">
                         {student.teamId ? (
-                          <span className="flex items-center gap-1 text-xs px-2 py-1 bg-secondary rounded-full w-fit">
-                            {
-                              TEAM_EMOJIS[
-                                student.teamId?.charAt(0).toUpperCase() + student.teamId?.slice(1)
-                              ]
-                            }
-                            {student.teamId?.charAt(0).toUpperCase() + student.teamId?.slice(1)}
-                          </span>
+                          (() => {
+                            const foundTeam = teams.find(t => t.id === student.teamId);
+                            const tName = foundTeam ? foundTeam.name : (student.team || 'Unknown');
+                            return (
+                              <span className="flex items-center gap-1 text-xs px-2 py-1 bg-secondary rounded-full w-fit">
+                                {TEAM_EMOJIS[tName] || '🛡️'}
+                                {tName}
+                              </span>
+                            );
+                          })()
                         ) : (
                           <span className="text-muted-foreground italic">Unassigned</span>
                         )}
                       </td>
                       <td className="px-3 py-3 text-right font-mono font-bold text-primary sm:px-6 sm:py-4">
-                        {formatNumber(student.totalPoints || 0)}
+                        {formatNumber(student.points || student.totalPoints || 0)}
                       </td>
                     </motion.tr>
                   ))}

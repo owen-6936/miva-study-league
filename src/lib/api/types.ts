@@ -54,6 +54,7 @@ export interface User {
   transferTokens: number;
   graceDeadline: string | null;
   totalPoints: number;
+  points?: number;
   createdAt: string;
   updatedAt: string;
   verified: boolean;
@@ -83,7 +84,8 @@ export interface Team {
   slogan?: string;
   maxMembers: number;
   members: User[];
-  point: number;
+  points: number;
+  point?: number; // legacy
   captainId?: string;
   rank?: number;
   createdAt: string;
@@ -110,11 +112,24 @@ export interface TeamRolesUpdate {
 export type MissionStatus = 'draft' | 'published' | 'active' | 'completed';
 
 /** Individual mission task item. */
+export interface QuizQuestion {
+  id: string;
+  questionText: string;
+  options: string[];
+  correctAnswer: string;
+}
+
 export interface MissionTask {
   id: string;
-  description: string;
-  isRequired: boolean;
   order: number;
+  title: string;
+  description: string;
+  type: 'TEXT_RESPONSE' | 'URL_SUBMISSION' | 'QUIZ';
+  points: number;
+  isRequired: boolean;
+  
+  // Quiz Specific Fields
+  quizQuestions?: QuizQuestion[];
 }
 
 /** Weekly mission model. */
@@ -122,13 +137,21 @@ export interface Mission {
   id: string;
   title: string;
   courseId: string;
-  description: string;
-  pointsPerTask: number;
-  tasksTotal: number;
-  completionBonus: number;
+  
+  // The B.R.A.D framework
+  storyBrief: string;      // The gamified scenario (Markdown supported)
+  resources: string[];     // URLs or Markdown links to study materials
+  tasks: MissionTask[];    // The actual deliverables
+  
+  // Loot & Mechanics
+  basePoints: number;
+  firstBloodBonus: number; // Extra points for fast submitters
+  teamSynergyBonus: number;// Bonus if the whole team completes it
+  
+  // Timing
   createdAt: string;
   deadline: string;
-  status?: 'active' | 'expired' | 'completed' | 'upcoming';
+  status?: 'active' | 'expired' | 'completed' | 'upcoming' | 'grading';
 }
 
 // ---- Challenge ----
@@ -202,6 +225,7 @@ export interface LeaderboardEntry {
   rank: number;
   team: Team;
   totalPoints: number;
+  points?: number;
   weeklyPoints: number;
   wins: number;
   losses: number;
@@ -215,6 +239,7 @@ export interface IndividualRanking {
   rank: number;
   user: User;
   totalPoints: number;
+  points?: number;
   teamName: string;
 }
 

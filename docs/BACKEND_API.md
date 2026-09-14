@@ -372,14 +372,16 @@ These endpoints power the `/admin` UI, including the overview dashboard, the use
 }
 ```
 
-### `GET /admin/activities` (Optional / Future)
+### `GET /admin/activities`
 *Headers: `Authorization: Bearer <token>`*
-*Behavior: Returns recent platform logs for the side panel.*
+*Behavior: Returns recent platform logs for the admin dashboard side panel. Queries the `Activity` collection.*
 ```json
-[
-  { "text": "Team Alpha submitted a solution for Mission 3", "time": "10m ago" },
-  { "text": "New user 'John Doe' registered", "time": "1h ago" }
-]
+{
+  "activities": [
+    { "text": "Team Alpha submitted a solution for Mission 3", "time": "10m ago" },
+    { "text": "New user 'John Doe' registered", "time": "1h ago" }
+  ]
+}
 ```
 
 ### `GET /users` (Already requested, but confirming format)

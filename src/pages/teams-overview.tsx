@@ -41,7 +41,7 @@ interface Team {
   name: string;
   members: string[];
   maxMembers: number;
-  point: number;
+  points?: number; point?: number;
 }
 
 export function TeamsOverview() {
@@ -62,7 +62,7 @@ export function TeamsOverview() {
       const fetchedTeams = res.data.teams || res.data || [];
 
       // Sort teams by points descending to determine rank
-      fetchedTeams.sort((a: Team, b: Team) => b.point - a.point);
+      fetchedTeams.sort((a: Team, b: Team) => (b.points || b.point || 0) - (a.points || a.point || 0));
       setTeams(fetchedTeams);
     } catch (error: unknown) {
       console.error(getApiError(error));
@@ -135,7 +135,7 @@ export function TeamsOverview() {
             <Users className="h-3.5 w-3.5" />
             {totalMembers} Active Members
           </Badge>
-          {leader && leader.point > 0 && (
+          {leader && (leader.points || leader.point || 0) > 0 && (
             <Badge className="border-primary/25 bg-primary/10 text-primary">
               <Trophy className="h-3.5 w-3.5" />
               Team {leader.name} leads
@@ -186,7 +186,7 @@ export function TeamsOverview() {
                         Rank #{rank}
                       </Badge>
                       <Badge className="border border-border/50 bg-transparent text-muted-foreground hover:bg-transparent">
-                        {team.point} pts
+                        {team.points || team.point || 0} pts
                       </Badge>
                     </div>
 

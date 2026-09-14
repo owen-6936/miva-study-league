@@ -437,3 +437,19 @@ These endpoints power the `/admin` UI, including the overview dashboard, the use
   "teams": [...]
 }
 ```
+
+## 6. Announcements (v1.2.1)
+The frontend dashboard consumes official announcements via `GET /announcements`.
+
+**Interface Expectation:**
+```typescript
+export interface DashboardAnnouncement {
+  id: string;
+  title: string;
+  content: string;
+  date?: string;
+  type?: string; // 'info', 'alert', 'success', 'warning'
+  expiresAt?: string; // ISO String. Frontend automatically hides it if past this date.
+}
+```
+*Note: Your backend can also filter by `expiresAt` directly to save payload bandwidth.*

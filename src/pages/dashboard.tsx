@@ -87,6 +87,7 @@ export interface DashboardAnnouncement {
   content: string;
   date: string;
   type: string;
+  expiresAt?: string;
 }
 
 export function Dashboard() {
@@ -141,7 +142,9 @@ export function Dashboard() {
       }
       try {
         const res = await apiClient.get('/announcements');
-        setAnnouncements(res.data.announcements || res.data || []);
+        const fetched = res.data.announcements || res.data || [];
+        const activeOnly = fetched.filter((a: DashboardAnnouncement) => !a.expiresAt || new Date(a.expiresAt) > new Date());
+        setAnnouncements(activeOnly);
       } catch (error) {
         console.error('Failed to load announcements', error);
       }
@@ -463,7 +466,7 @@ export function Dashboard() {
                   </Link>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
                 {topTeams.length === 0 && (
                   <div className="text-center text-sm text-muted-foreground py-4 animate-pulse">
                     Loading standings...
@@ -505,7 +508,7 @@ export function Dashboard() {
               <CardHeader>
                 <CardTitle>Recent Activity</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
                 {activities.length === 0 && (
                   <div className="py-8 text-center">
                     <p className="text-muted-foreground text-sm">No recent activity.</p>

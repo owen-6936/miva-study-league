@@ -73,6 +73,13 @@ Users with the `admin` role have access to the `/admin` route which includes:
 
 ## 📦 Changelog
 
+### v1.2.1
+- **Announcement Expiration**: The Student Dashboard now natively supports an `expiresAt` property for announcements, automatically hiding them once their time has passed.
+- **Leaderboard Resilience**: Improved the leaderboard parser to handle dynamic payload keys (`users` vs `topUsers`) and elegantly fallback to `fullName` if `name` is missing.
+- **Activity Feed UI Limits**: Introduced constrained scrolling (`max-h-[400px]`) to the Recent Activity feeds across both Student and Admin dashboards to prevent infinite vertical layout stretching.
+- **Mission UI Polish**: Fixed missing spacing on the Briefing Room / Arena tab icons and added a clean divider above the resources list.
+
+
 ### v1.2.0 (Flipped Classroom Update)
 - **Rich Media Briefing Room**: Upgraded Mission Detail screen with a two-tab interface (`Briefing Room` and `The Arena`).
 - **Smart Embedded Players**: Added automatic iframe embedding for YouTube and Google Drive Audio/Video resources, including a smart URL parsing fallback that auto-prepends `https://`.

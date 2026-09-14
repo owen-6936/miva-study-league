@@ -70,7 +70,7 @@ export function Leaderboard() {
           (a: Team, b: Team) => ((b.points || b.point || 0) - (a.points || a.point || 0))
         );
 
-        const sortedUsers = (data.topUsers || []).sort(
+        const sortedUsers = (data.topUsers || data.users || []).sort(
           (a: User, b: User) => ((b.points || b.totalPoints || 0) - (a.points || a.totalPoints || 0))
         );
 
@@ -200,7 +200,7 @@ export function Leaderboard() {
                           i + 1
                         )}
                       </td>
-                      <td className="px-3 py-3 font-medium sm:px-6 sm:py-4">{student.name}</td>
+                      <td className="px-3 py-3 font-medium sm:px-6 sm:py-4">{student.fullName || student.name}</td>
                       <td className="px-3 py-3 sm:px-6 sm:py-4">
                         {student.teamId ? (
                           (() => {

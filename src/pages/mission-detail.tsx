@@ -96,8 +96,8 @@ export function MissionDetailPage() {
 
             <Tabs defaultValue="briefing" className="w-full space-y-8">
         <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto">
-          <TabsTrigger value="briefing" className="gap-2"><BookOpen className="w-4 h-4" /> The Briefing Room</TabsTrigger>
-          <TabsTrigger value="arena" className="gap-2"><Send className="w-4 h-4" /> The Arena (Tasks)</TabsTrigger>
+          <TabsTrigger value="briefing" className="gap-2"><BookOpen className="w-4 h-4 mr-2" /> The Briefing Room</TabsTrigger>
+          <TabsTrigger value="arena" className="gap-2"><Send className="w-4 h-4 mr-2" /> The Arena (Tasks)</TabsTrigger>
         </TabsList>
 
         <TabsContent value="briefing" className="space-y-8">

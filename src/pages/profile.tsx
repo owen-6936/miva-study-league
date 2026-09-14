@@ -49,7 +49,7 @@ const ACHIEVEMENTS = [
     description: 'Completed your first mission',
     emoji: '🩸',
     colorClass: 'bg-red-100 border-red-200 dark:bg-red-900/30 dark:border-red-800',
-    isEarned: (user: User | null) => (user?.totalPoints || 0) > 0,
+    isEarned: (user: User | null) => (user?.points || user?.totalPoints || 0) > 0,
   }
 ];
 
@@ -138,7 +138,7 @@ export function Profile() {
                   <Star className="w-5 h-5 text-yellow-500" />
                   <span className="font-medium">Total Points</span>
                 </div>
-                <span className="font-bold text-lg">{formatNumber(user?.totalPoints || 0)}</span>
+                <span className="font-bold text-lg">{formatNumber(user?.points || user?.totalPoints || 0)}</span>
               </div>
               <div className="flex justify-between items-center p-3 bg-secondary/30 rounded-lg">
                 <div className="flex items-center gap-3">

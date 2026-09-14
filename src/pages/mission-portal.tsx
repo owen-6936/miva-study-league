@@ -88,7 +88,7 @@ export function MissionPortalPage() {
                 </CardTitle>
               </div>
               <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
-                {activeMission.description}
+                {activeMission.storyBrief}
               </p>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -115,7 +115,7 @@ export function MissionPortalPage() {
               <div className="space-y-3">
                 <h3 className="font-medium">Mission Tasks</h3>
                 <ul className="space-y-2">
-                  <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-primary mt-2" /><span className="text-muted-foreground">{activeMission.description}</span></li>
+                  <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-primary mt-2" /><span className="text-muted-foreground">{activeMission.storyBrief}</span></li>
                 </ul>
               </div>
             </CardContent>

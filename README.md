@@ -70,3 +70,12 @@ Users with the `admin` role have access to the `/admin` route which includes:
 
 ---
 *Powered by Miva Star Owen*
+
+## 📦 Changelog
+
+### v1.1.0
+- **Dynamic Admin Stats**: The Admin Dashboard now dynamically fetches `Total Users`, `Active Teams`, `Active Missions`, and `Total Submissions` live from the database via `/admin/stats`.
+- **Nested Quiz Architecture**: Rebuilt the mission structure to support multiple nested multiple-choice questions within a single quiz task.
+- **Removed File Uploads**: Transitioned fully to URL submissions for external link verification to save object storage space.
+- **Leaderboard Team UI Fixes**: Leaderboard UI properly links to team names and accurately displays MongoDB `points` integration.
+- **Strict TypeScript Compliance**: Enforced strict adherence to domain models without using `any` mappings.

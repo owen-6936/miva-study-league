@@ -119,7 +119,7 @@ export function TeamHub() {
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
               <Badge className="flex items-center gap-1.5 px-3 py-1.5 border-border/50 text-muted-foreground bg-transparent hover:bg-transparent">
                 <Trophy className="h-4 w-4" />
-                {team.point} Points
+                {team.points || team.point || 0} Points
               </Badge>
               <Badge className="flex items-center gap-1.5 px-3 py-1.5 border-border/50 text-muted-foreground bg-transparent hover:bg-transparent">
                 <Users className="h-4 w-4" />

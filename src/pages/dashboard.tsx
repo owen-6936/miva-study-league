@@ -73,9 +73,10 @@ function getRelativeTime(dateString: string) {
 export interface DashboardActivity {
   id: string;
   type: 'mission' | 'join' | 'other';
-  user: string;
-  action: string;
-  target: string;
+  user?: string;
+  action?: string;
+  target?: string;
+  message?: string;
   time: string;
   createdAt: string;
 }
@@ -248,7 +249,7 @@ export function Dashboard() {
           },
           {
             title: 'Personal Points',
-            value: user?.totalPoints || 0,
+            value: user?.points || user?.totalPoints || 0,
             icon: Star,
             color: 'text-blue-500',
           },
@@ -370,13 +371,13 @@ export function Dashboard() {
                     <div className="space-y-2 mb-6">
                       <div className="flex justify-between text-sm">
                         <span>
-                          Progress: {currentMission.tasksTotal || 0}/
-                          {currentMission.tasksTotal || 1} tasks
+                          Progress: {currentMission.tasks?.length || 0}/
+                          {currentMission.tasks?.length || 1} tasks
                         </span>
                         <span className="font-medium">
                           {Math.round(
-                            ((currentMission.tasksTotal || 0) /
-                              (currentMission.tasksTotal || 1)) *
+                            ((currentMission.tasks?.length || 0) /
+                              (currentMission.tasks?.length || 1)) *
                               100,
                           )}
                           %
@@ -384,8 +385,8 @@ export function Dashboard() {
                       </div>
                       <Progress
                         value={
-                          ((currentMission.tasksTotal || 0) /
-                            (currentMission.tasksTotal || 1)) *
+                          ((currentMission.tasks?.length || 0) /
+                            (currentMission.tasks?.length || 1)) *
                           100
                         }
                         className="h-2"
@@ -475,12 +476,12 @@ export function Dashboard() {
                         <span className="w-4 text-muted-foreground">{i + 1}.</span>
                         {TEAM_EMOJIS[team.name]} {team.name}
                       </span>
-                      <span className="font-bold">{formatNumber(team.point)}</span>
+                      <span className="font-bold">{formatNumber(team.points || team.point || 0)}</span>
                     </div>
                     <div className="w-full bg-secondary rounded-full h-2">
                       <motion.div
                         initial={{ width: 0 }}
-                        animate={{ width: `${(team.point / maxPoints) * 100}%` }}
+                        animate={{ width: `${((team.points || team.point || 0) / maxPoints) * 100}%` }}
                         className={cn(
                           'h-full rounded-full',
                           TEAM_COLORS[team.name]?.bg.replace('/10', ''),
@@ -534,7 +535,7 @@ export function Dashboard() {
                         <Icon className="w-4 h-4" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium">{activity.user} {activity.action} {activity.target}</p>
+                        <p className="text-sm font-medium">{activity.message || `${activity.user || ""} ${activity.action || ""} ${activity.target || ""}`}</p>
                         <p className="text-xs text-muted-foreground">
                           {getRelativeTime(activity.createdAt)}
                         </p>

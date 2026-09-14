@@ -13,7 +13,51 @@ import { apiClient } from '@/lib/api/client';
 import { getApiError } from '@/lib/api/client';
 import { toast } from 'sonner';
 
+export interface AdminActivity {
+  text: string;
+  time: string;
+}
+
 export function AdminDashboardPage() {
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    activeTeams: 0,
+    activeMissions: 0,
+    totalSubmissions: 0,
+    userTrend: 0,
+    submissionTrend: 0
+  });
+  const [activities, setActivities] = useState<AdminActivity[]>([]);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await apiClient.get('/admin/stats');
+        if (res.data) {
+          setStats({
+            totalUsers: res.data.totalUsers || 0,
+            activeTeams: res.data.activeTeams || 0,
+            activeMissions: res.data.activeMissions || 0,
+            totalSubmissions: res.data.totalSubmissions || 0,
+            userTrend: res.data.userTrend || 0,
+            submissionTrend: res.data.submissionTrend || 0,
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load admin stats:', error);
+      }
+      
+      try {
+        const actRes = await apiClient.get('/admin/activities');
+        if (actRes.data) {
+          setActivities(actRes.data.activities || actRes.data || []);
+        }
+      } catch (error) {
+        console.error('Failed to load admin activities:', error);
+      }
+    };
+    fetchStats();
+  }, []);
   const [season, setSeason] = useState<Season | null>(null);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -134,10 +178,10 @@ export function AdminDashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard title="Total Users" value={142} icon={<Users />} trend={12} />
-        <StatCard title="Active Teams" value={7} icon={<Shield />} />
-        <StatCard title="Active Missions" value={2} icon={<Target />} />
-        <StatCard title="Submissions" value={89} icon={<Zap />} trend={5} />
+        <StatCard title="Total Users" value={stats.totalUsers} icon={<Users />} trend={stats.userTrend} />
+        <StatCard title="Active Teams" value={stats.activeTeams} icon={<Shield />} />
+        <StatCard title="Active Missions" value={stats.activeMissions} icon={<Target />} />
+        <StatCard title="Submissions" value={stats.totalSubmissions} icon={<Zap />} trend={stats.submissionTrend} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -249,12 +293,12 @@ export function AdminDashboardPage() {
           <Card>
             <CardContent className="p-0">
               <div className="divide-y divide-border">
-                {[
-                  { text: 'Team Alpha submitted a solution for Mission 3', time: '10m ago' },
-                  { text: 'New user "John Doe" registered', time: '1h ago' },
-                  { text: 'Challenge "Week 2 Showdown" ended', time: '2d ago' },
-                  { text: 'Scores updated for Team Beta', time: '2d ago' },
-                ].map((act, i) => (
+                {activities.length === 0 && (
+                  <div className="p-4 text-center text-sm text-muted-foreground">
+                    No recent activity.
+                  </div>
+                )}
+                {activities.map((act, i) => (
                   <div key={i} className="p-4 flex flex-col gap-1">
                     <p className="text-sm font-medium">{act.text}</p>
                     <p className="text-xs text-muted-foreground">{act.time}</p>

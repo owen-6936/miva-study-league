@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Modal } from '@/components/ui/modal';
-import { Users, Shield, Target, Zap, ChevronRight, Calendar, Loader2, Trash2 } from 'lucide-react';
+import { Users, Shield, Target, Zap, ChevronRight, Calendar, Loader2, Trash2, Award, Megaphone } from 'lucide-react';
 import { Link } from 'react-router';
 import { apiClient } from '@/lib/api/client';
 import { getApiError } from '@/lib/api/client';
@@ -234,6 +234,28 @@ export function AdminDashboardPage() {
                 <div>
                   <h3 className="font-bold text-lg mb-1">Score Entry</h3>
                   <p className="text-sm text-muted-foreground mb-4">Manually update team points.</p>
+                  <Link to="/admin/submissions" className="w-full flex-1">
+                    <Button variant="outline" className="w-full justify-start gap-2 h-14 bg-surface hover:bg-primary/5 hover:text-primary transition-colors border-primary/20">
+                      <div className="p-2 bg-primary/10 rounded-md">
+                        <Award className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="flex flex-col items-start">
+                        <span className="font-bold">Review Submissions</span>
+                        <span className="text-xs text-muted-foreground">Grade manual tasks</span>
+                      </div>
+                    </Button>
+                  </Link>
+                  <Link to="/admin/announcements" className="w-full flex-1">
+                    <Button variant="outline" className="w-full justify-start gap-2 h-14 bg-surface hover:bg-primary/5 hover:text-primary transition-colors border-primary/20">
+                      <div className="p-2 bg-primary/10 rounded-md">
+                        <Megaphone className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="flex flex-col items-start">
+                        <span className="font-bold">Broadcast Center</span>
+                        <span className="text-xs text-muted-foreground">Manage announcements</span>
+                      </div>
+                    </Button>
+                  </Link>
                   <Link to="/admin/scores" className="w-full flex-1">
                     <Button variant="outline" className="w-full">
                       Enter Scores

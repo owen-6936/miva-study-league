@@ -5,7 +5,7 @@ import { DataTable } from '@/components/ui/data-table';
 import type { Column } from '@/components/ui/data-table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Search, Filter, MoreHorizontal, Loader2 } from 'lucide-react';
+import { Search, Filter, Loader2 } from 'lucide-react';
 import { apiClient } from '@/lib/api/client';
 import { toast } from 'sonner';
 
@@ -17,28 +17,46 @@ interface AdminUserRow {
   team: string | null;
   role: 'admin' | 'student';
   verified: boolean;
+  transferTokens?: number;
+  _id?: string;
 }
 
 export function AdminUsersPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [users, setUsers] = useState<AdminUserRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isGranting, setIsGranting] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const res = await apiClient.get('/users');
-        // We expect the backend to send: { success: true, data: [...] } or just an array
-        setUsers(res.data.users || res.data);
-      } catch (err) {
-        console.error(err);
-        toast.error('Failed to load users');
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchUsers();
   }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const res = await apiClient.get('/users');
+      setUsers(res.data.users || res.data || []);
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to load users');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGrantToken = async (userId: string) => {
+    setIsGranting(userId);
+    try {
+      await apiClient.post(`/admin/users/${userId}/grant-token`);
+      toast.success('Transfer token granted to student!');
+      
+      // Optimistically update the UI
+      setUsers(users.map(u => (u.id === userId || u._id === userId) ? { ...u, transferTokens: (u.transferTokens || 0) + 1 } : u));
+    } catch {
+      toast.error('Failed to grant transfer token');
+    } finally {
+      setIsGranting(null);
+    }
+  };
 
   const columns: Column<AdminUserRow>[] = [
     { header: 'Name', accessorKey: 'name' },
@@ -86,10 +104,24 @@ export function AdminUsersPage() {
       ),
     },
     {
+      header: 'Tokens',
+      cell: (row) => (
+        <span className="font-mono text-sm font-bold">
+          {row.transferTokens || 0}
+        </span>
+      ),
+    },
+    {
       header: 'Actions',
-      cell: () => (
-        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-          <MoreHorizontal className="h-4 w-4" />
+      cell: (row) => (
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="text-xs"
+          onClick={() => handleGrantToken(row.id || row._id!)}
+          disabled={isGranting === (row.id || row._id)}
+        >
+          {isGranting === (row.id || row._id) ? <Loader2 className="w-3 h-3 animate-spin" /> : '+ Token'}
         </Button>
       ),
     },

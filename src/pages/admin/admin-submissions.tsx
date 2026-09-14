@@ -35,6 +35,7 @@ export const AdminSubmissionsPage = () => {
   const [submissions, setSubmissions] = useState<UserMission[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedMission, setSelectedMission] = useState<UserMission | null>(null);
+  const [rejectionHint, setRejectionHint] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetchSubmissions();
@@ -56,7 +57,8 @@ export const AdminSubmissionsPage = () => {
     try {
       await apiClient.post(`/missions/submissions/${selectedMission.id}/grade/${taskId}`, {
         approved,
-        pointsAwarded: approved ? maxPoints : 0
+        pointsAwarded: approved ? maxPoints : 0,
+        hint: !approved ? rejectionHint[taskId] : undefined
       });
       toast.success(approved ? 'Task Approved & Points Awarded' : 'Task Rejected');
       
@@ -127,20 +129,28 @@ export const AdminSubmissionsPage = () => {
                     </div>
 
                     {submission.status === 'pending' ? (
-                      <div className="flex gap-4 pt-4 border-t border-border">
+                      <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-border">
                         <Button 
                           onClick={() => gradeTask((task.id || task._id)!, true, task.points)}
-                          className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                          className="flex-1 h-auto py-3 bg-green-600 hover:bg-green-700 text-white"
                         >
                           <CheckCircle className="w-4 h-4 mr-2" /> Approve & Award Points
                         </Button>
-                        <Button 
-                          onClick={() => gradeTask((task.id || task._id)!, false, task.points)}
-                          variant="destructive" 
-                          className="flex-1"
-                        >
-                          <XCircle className="w-4 h-4 mr-2" /> Reject
-                        </Button>
+                        <div className="flex-1 flex flex-col gap-2">
+                          <textarea 
+                            placeholder="Optional hint for rejection..."
+                            className="w-full text-sm p-2 rounded-md border border-input bg-background min-h-[60px]"
+                            value={rejectionHint[(task.id || task._id)!] || ''}
+                            onChange={(e) => setRejectionHint({...rejectionHint, [(task.id || task._id)!]: e.target.value})}
+                          />
+                          <Button 
+                            onClick={() => gradeTask((task.id || task._id)!, false, task.points)}
+                            variant="destructive" 
+                            className="w-full"
+                          >
+                            <XCircle className="w-4 h-4 mr-2" /> Reject Task
+                          </Button>
+                        </div>
                       </div>
                     ) : (
                       <div className="pt-4 border-t border-border flex items-center gap-2 text-green-500">

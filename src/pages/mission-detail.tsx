@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CountdownTimer } from '@/components/ui/countdown-timer';
-import { ArrowLeft, Link as LinkIcon, BookOpen, AlertCircle, Send, PlayCircle, FileText, Headphones } from 'lucide-react';
+import { ArrowLeft, Link as LinkIcon, BookOpen, AlertCircle, Send, PlayCircle, FileText, Headphones, CheckCircle, Clock, Loader2 } from 'lucide-react';
 import { apiClient, getApiError } from '@/lib/api/client';
 import { toast } from 'sonner';
 import { PageLoader } from '@/components/ui/page-loader';
@@ -21,7 +21,10 @@ const getDrivePreviewUrl = (url: string) => {
   }
   
   if (parsedUrl.includes('drive.google.com/file/d/')) {
-    return parsedUrl.replace('/view', '/preview').split('?')[0] + '/preview';
+    const match = parsedUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (match && match[1]) {
+      return `https://drive.google.com/file/d/${match[1]}/preview`;
+    }
   }
   if (parsedUrl.includes('youtube.com/watch?v=')) {
     return parsedUrl.replace('watch?v=', 'embed/').split('&')[0];
@@ -32,19 +35,33 @@ const getDrivePreviewUrl = (url: string) => {
   return parsedUrl;
 };
 
+interface TaskSubmissionProgress {
+  taskId: string;
+  status: string;
+  hint?: string;
+}
+
+interface UserProgressData {
+  completed: boolean;
+  taskSubmissions: TaskSubmissionProgress[];
+}
+
 export function MissionDetailPage() {
   const { missionId } = useParams();
   const [mission, setMission] = useState<Mission | null>(null);
+  const [userProgress, setUserProgress] = useState<UserProgressData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
   // Minimal local state for submissions
   const [submissions, setSubmissions] = useState<Record<string, string>>({});
+  const [submittingTaskId, setSubmittingTaskId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchMission = async () => {
       try {
         const res = await apiClient.get(`/missions/${missionId}`);
         setMission(res.data.mission || res.data);
+        setUserProgress(res.data.userProgress);
       } catch (error) {
         toast.error(getApiError(error, 'Failed to load mission'));
       } finally {
@@ -68,6 +85,7 @@ export function MissionDetailPage() {
   }
 
   const handleSubmitTask = async (taskId: string) => {
+    setSubmittingTaskId(taskId);
     try {
       const answerPayload = submissions[taskId];
       const res = await apiClient.post(`/missions/${missionId}/tasks/${taskId}/submit`, {
@@ -80,9 +98,14 @@ export function MissionDetailPage() {
       }
       
       // Update local state to reflect submission so the button can disable
-      // Optionally re-fetch the mission to get the latest progress
+      // Re-fetch the mission to get the latest user progress
+      const progressRes = await apiClient.get(`/missions/${missionId}`);
+      setUserProgress(progressRes.data.userProgress);
+      
     } catch (error) {
       toast.error(getApiError(error, 'Failed to submit task'));
+    } finally {
+      setSubmittingTaskId(null);
     }
   };
 
@@ -201,7 +224,48 @@ export function MissionDetailPage() {
                     </div>
 
                     <div className="mt-4">
-                      {task.type === 'TEXT_RESPONSE' && (
+                      {(() => {
+                        const taskProgress = userProgress?.taskSubmissions?.find(
+                          (t: TaskSubmissionProgress) => t.taskId === task.id || t.taskId === (task as { _id?: string })._id
+                        );
+                        
+                        if (taskProgress?.status === 'pending') {
+                          return (
+                            <div className="p-4 border border-yellow-500/50 bg-yellow-500/10 rounded-md flex gap-3 text-yellow-600">
+                              <Clock className="w-5 h-5 shrink-0" />
+                              <div>
+                                <p className="font-bold text-sm">Under Review</p>
+                                <p className="text-sm">Your submission is pending review by an admin.</p>
+                              </div>
+                            </div>
+                          );
+                        }
+                        
+                        if (taskProgress?.status === 'approved' || taskProgress?.status === 'graded') {
+                          return (
+                            <div className="p-4 border border-green-500/50 bg-green-500/10 rounded-md flex gap-3 text-green-600">
+                              <CheckCircle className="w-5 h-5 shrink-0" />
+                              <div>
+                                <p className="font-bold text-sm">Approved!</p>
+                                <p className="text-sm">You have successfully completed this task.</p>
+                              </div>
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <>
+                            {taskProgress?.status === 'rejected' && (
+                              <div className="mb-4 p-4 border border-destructive/50 bg-destructive/10 rounded-md flex gap-3 text-destructive">
+                                <AlertCircle className="w-5 h-5 shrink-0" />
+                                <div>
+                                  <p className="font-bold text-sm">Task Rejected: Try Again</p>
+                                  <p className="text-sm mt-1">{taskProgress.hint || 'Please review the prompt and submit a new answer.'}</p>
+                                </div>
+                              </div>
+                            )}
+
+                            {task.type === 'TEXT_RESPONSE' && (
                         <textarea 
                           placeholder="Type your answer here..."
                           className="w-full min-h-[120px] p-3 rounded-md border border-input bg-background text-sm"
@@ -263,10 +327,14 @@ export function MissionDetailPage() {
                       <Button 
                         className="w-full mt-4" 
                         onClick={() => handleSubmitTask(task.id)}
-                        disabled={!submissions[task.id]}
+                        disabled={!submissions[task.id] || submittingTaskId === task.id}
                       >
-                        <Send className="w-4 h-4 mr-2" /> Submit Task
+                        {submittingTaskId === task.id ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />} 
+                        {taskProgress?.status === 'rejected' ? 'Resubmit Task' : 'Submit Task'}
                       </Button>
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
                 ))}

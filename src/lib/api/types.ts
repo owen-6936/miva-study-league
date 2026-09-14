@@ -77,6 +77,7 @@ export interface TeamMember {
 
 /** Team domain model used by overview and leaderboard pages. */
 export interface Team {
+  _id?: string;
   id: string;
   name: string;
   emoji: string;

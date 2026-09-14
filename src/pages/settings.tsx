@@ -6,11 +6,54 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import type { ThemeName } from '@/lib/stores/theme-store';
 import { useThemeStore, THEME_META } from '@/lib/stores/theme-store';
+import { useAuthStore } from '@/lib/stores/auth-store';
+import { apiClient, getApiError } from '@/lib/api/client';
+import { toast } from 'sonner';
+import { useState, useEffect } from 'react';
+import type { Team } from '@/lib/api/types';
 import { cn } from '@/lib/utils';
-import { Moon, Sun, Monitor, Bell, Lock, Info, CheckCircle2 } from 'lucide-react';
+import { Moon, Sun, Monitor, Bell, Lock, Info, CheckCircle2, Shuffle, Loader2 } from 'lucide-react';
 
 export function Settings() {
   const { theme, setTheme, isDark, toggleDark } = useThemeStore();
+  const { user, updateUser } = useAuthStore();
+  
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [isTransferring, setIsTransferring] = useState(false);
+  const [selectedTeamId, setSelectedTeamId] = useState<string>('');
+
+  useEffect(() => {
+    if ((user?.transferTokens || 0) > 0) {
+      apiClient.get('/teams').then(res => {
+        setTeams(res.data.teams || res.data || []);
+      }).catch(() => {});
+    }
+  }, [user?.transferTokens]);
+
+  const handleTeamTransfer = async () => {
+    if (!selectedTeamId) return toast.error('Please select a team to transfer to.');
+    
+    setIsTransferring(true);
+    try {
+      const res = await apiClient.post('/users/transfer-team', { newTeamId: selectedTeamId });
+      toast.success('Successfully transferred to your new team!');
+      if (res.data?.user) {
+        updateUser(res.data.user);
+      } else {
+        // Fallback optimistic update
+        const team = teams.find(t => t.id === selectedTeamId || t._id === selectedTeamId);
+        updateUser({ 
+          teamId: selectedTeamId, 
+          team: team?.name || user?.team,
+          transferTokens: (user?.transferTokens || 1) - 1
+        });
+      }
+    } catch (error) {
+      toast.error(getApiError(error, 'Failed to transfer team'));
+    } finally {
+      setIsTransferring(false);
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-8">
@@ -135,6 +178,55 @@ export function Settings() {
       </div>
 
       <hr className="border-border" />
+
+      {/* Team Transfer Section */}
+      {(user?.transferTokens || 0) > 0 && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="md:col-span-1 space-y-2">
+              <h2 className="text-xl font-semibold flex items-center gap-2 text-primary">
+                <Shuffle className="w-5 h-5" /> Team Transfer
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                You have {user?.transferTokens} Transfer Token(s). Select a new team below.
+              </p>
+            </div>
+            <div className="md:col-span-2">
+              <Card className="border-primary/20 bg-primary/5">
+                <CardContent className="p-6 space-y-4">
+                  <div className="space-y-2">
+                    <Label>Select New Team</Label>
+                    <select 
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                      value={selectedTeamId}
+                      onChange={(e) => setSelectedTeamId(e.target.value)}
+                    >
+                      <option value="">-- Choose a Team --</option>
+                      {teams.filter(t => (t.id || t._id) !== user?.teamId).map(team => {
+                        const isFull = (team.members?.length || 0) >= (team.maxMembers || 6);
+                        return (
+                          <option key={team.id || team._id} value={team.id || team._id} disabled={isFull}>
+                            {team.emoji} {team.name} {isFull ? '(FULL)' : ''}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
+                  <Button 
+                    onClick={handleTeamTransfer} 
+                    disabled={!selectedTeamId || isTransferring}
+                    className="w-full sm:w-auto"
+                  >
+                    {isTransferring ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Shuffle className="w-4 h-4 mr-2" />} 
+                    Confirm Transfer
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+          <hr className="border-border" />
+        </>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-1 space-y-2">

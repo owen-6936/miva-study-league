@@ -42,6 +42,7 @@ export type UserRole = 'student' | 'admin';
 
 /** User profile model used throughout the frontend. */
 export interface User {
+  _id?: string;
   id: string;
   email: string;
   fullName: string;

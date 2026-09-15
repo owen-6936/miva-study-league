@@ -1,5 +1,5 @@
 import type { Season, Team, Mission } from "@/lib/api/types";
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { apiClient } from '@/lib/api/client';
 
@@ -13,6 +13,7 @@ import {
   Clock,
   Activity,
   ChevronRight,
+  ChevronLeft,
   Zap,
   Shield,
   Megaphone,
@@ -100,6 +101,7 @@ export function Dashboard() {
   const [currentMission, setCurrentMission] = useState<Mission | null>(null);
   const [activities, setActivities] = useState<DashboardActivity[]>([]);
   const [announcements, setAnnouncements] = useState<DashboardAnnouncement[]>([]);
+  const [activeAnnouncement, setActiveAnnouncement] = useState(0);
   const [season, setSeason] = useState<Season | null>(null);
 
   useEffect(() => {
@@ -152,6 +154,14 @@ export function Dashboard() {
     };
     fetchDashboardData();
   }, []);
+
+  useEffect(() => {
+    if (announcements.length <= 1) return;
+    const interval = setInterval(() => {
+      setActiveAnnouncement((prev) => (prev + 1) % announcements.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [announcements.length]);
 
   const maxPoints = Math.max(topTeams[0]?.point || 1, 1000);
   const teamName = user?.team || 'Alpha';
@@ -328,25 +338,56 @@ export function Dashboard() {
                     <Megaphone className="w-5 h-5" /> Official Announcements
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {announcements.map(
-                      (
-                        ann,
-                        i: number,
-                      ) => (
-                        <div key={i} className="flex gap-3">
-                          <div className="mt-1 h-2 w-2 rounded-full bg-primary shrink-0" />
-                          <div>
-                            <h4 className="text-sm font-bold">{ann.title}</h4>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              {ann.content}
+                <CardContent className="relative">
+                  <div className="relative overflow-hidden min-h-[80px]">
+                    <AnimatePresence mode="wait">
+                      {announcements.length > 0 && (
+                        <motion.div
+                          key={activeAnnouncement}
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -20 }}
+                          transition={{ duration: 0.3 }}
+                          className="flex gap-3"
+                        >
+                          <div className="mt-1.5 h-2 w-2 rounded-full bg-primary shrink-0" />
+                          <div className="w-full">
+                            <h4 className="text-sm font-bold">{announcements[activeAnnouncement]?.title}</h4>
+                            <p className="text-sm text-muted-foreground mt-1 pr-6 leading-relaxed">
+                              {announcements[activeAnnouncement]?.content}
                             </p>
                           </div>
-                        </div>
-                      ),
-                    )}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
+                  
+                  {announcements.length > 1 && (
+                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-primary/10">
+                      <div className="flex gap-1">
+                        {announcements.map((_, idx) => (
+                          <div 
+                            key={idx} 
+                            className={`h-1.5 rounded-full transition-all duration-300 ${idx === activeAnnouncement ? 'w-4 bg-primary' : 'w-1.5 bg-primary/30'}`}
+                          />
+                        ))}
+                      </div>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => setActiveAnnouncement((prev) => prev === 0 ? announcements.length - 1 : prev - 1)}
+                          className="p-1 rounded-md hover:bg-primary/20 text-primary transition-colors cursor-pointer"
+                        >
+                          <ChevronLeft className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={() => setActiveAnnouncement((prev) => (prev + 1) % announcements.length)}
+                          className="p-1 rounded-md hover:bg-primary/20 text-primary transition-colors cursor-pointer"
+                        >
+                          <ChevronRight className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>

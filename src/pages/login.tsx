@@ -7,6 +7,7 @@ import { Link, useNavigate } from 'react-router';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { getApiError } from '@/lib/api/client';
 import { Button } from '@/components/ui/button';
+
 import { Input } from '@/components/ui/input';
 import {
   Card,
@@ -36,6 +37,8 @@ export function Login() {
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' },
   });
+
+  
 
   const onSubmit = async (data: LoginFormValues) => {
     try {
@@ -94,7 +97,7 @@ export function Login() {
             transition={{ duration: 0.4 }}
           >
             <Card className="border-border shadow-xl glass bg-bg-card/80 backdrop-blur-xl">
-              <CardHeader className="space-y-1 pb-6">
+              <CardHeader className="space-y-1 pb-4">
                 <CardTitle className="text-3xl font-bold font-heading">Welcome back</CardTitle>
                 <CardDescription>Enter your credentials to access your account</CardDescription>
               </CardHeader>

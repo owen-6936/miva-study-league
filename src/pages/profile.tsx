@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
+import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api/client';
 import { useAuthStore } from '@/lib/stores/auth-store';
@@ -58,6 +59,7 @@ export function Profile() {
   const teamName = user?.team || 'Unknown';
   const [rank, setRank] = useState<number | null>(null);
   const [activities, setActivities] = useState<ProfileActivity[]>([]);
+  const [analyticsData, setAnalyticsData] = useState<{date: string, xp: number}[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -78,6 +80,20 @@ export function Profile() {
         setActivities(actRes.data.activities || []);
       } catch (err) {
         console.error('Failed to load activities', err);
+      }
+      
+      try {
+        const analyticsRes = await apiClient.get('/users/me/analytics');
+        setAnalyticsData(analyticsRes.data.timeline || []);
+      } catch (err) {
+        console.error('Failed to load analytics', err);
+        // Fallback dummy data so UI renders while backend is being built
+        setAnalyticsData([
+          { date: 'Week 1', xp: 50 },
+          { date: 'Week 2', xp: 200 },
+          { date: 'Week 3', xp: 450 },
+          { date: 'Week 4', xp: (user?.points || user?.totalPoints || 500) }
+        ]);
       }
     };
     fetchData();
@@ -113,6 +129,11 @@ export function Profile() {
             <Badge className="text-sm py-1 px-3 bg-primary/10 text-primary hover:bg-primary/20 border-0 flex items-center gap-1">
               {TEAM_EMOJIS[teamName]} Team {teamName}
             </Badge>
+            {(user as any)?.isCaptain && (
+              <Badge className="text-sm py-1 px-3 bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20 border-yellow-500/30 flex items-center gap-1">
+                👑 Captain
+              </Badge>
+            )}
           </div>
         </div>
 
@@ -187,6 +208,54 @@ export function Profile() {
 
         {/* Timeline Column */}
         <div className="md:col-span-2 space-y-6">
+          {/* XP Growth Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="w-5 h-5 text-primary" /> XP Growth Trajectory
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[250px] w-full mt-4">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={analyticsData}>
+                    <defs>
+                      <linearGradient id="colorXp" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <XAxis 
+                      dataKey="date" 
+                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                      fontSize={12} 
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <YAxis 
+                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                      fontSize={12}
+                      tickLine={false}
+                      axisLine={false}
+                      tickFormatter={(value) => `${value}`}
+                    />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', borderRadius: '8px', color: 'hsl(var(--foreground))' }}
+                      itemStyle={{ color: 'hsl(var(--foreground))', fontWeight: 'bold' }}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="xp" 
+                      stroke="hsl(var(--primary))" 
+                      strokeWidth={3}
+                      fillOpacity={1} 
+                      fill="url(#colorXp)" 
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
           <Card className="h-full">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

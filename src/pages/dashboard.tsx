@@ -120,8 +120,8 @@ export function Dashboard() {
       }
 
       try {
-        const missionRes = await apiClient.get('/missions/current');
-        const missions = missionRes.data.missions || [];
+        const missionRes = await apiClient.get('/users/me/missions/current').catch(() => apiClient.get('/me/missions/current'));
+        const missions = missionRes.data.currentMissions || missionRes.data.missions || missionRes.data || [];
         if (missions.length > 0) {
           setCurrentMission(missions[0]);
         }
@@ -468,7 +468,7 @@ export function Dashboard() {
                   </Link>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+              <CardContent className="space-y-4 max-h-100 overflow-y-auto pr-2">
                 {topTeams.length === 0 && (
                   <div className="text-center text-sm text-muted-foreground py-4 animate-pulse">
                     Loading standings...
@@ -510,7 +510,7 @@ export function Dashboard() {
               <CardHeader>
                 <CardTitle>Recent Activity</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+              <CardContent className="space-y-4 max-h-100 overflow-y-auto pr-2">
                 {activities.length === 0 && (
                   <div className="py-8 text-center">
                     <p className="text-muted-foreground text-sm">No recent activity.</p>

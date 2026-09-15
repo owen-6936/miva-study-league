@@ -167,11 +167,11 @@ export function TeamHub() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="truncate font-semibold flex items-center gap-2">
-                          {memberName}
+                          {memberName} {member.isCaptain && <span className="text-yellow-500 ml-1 text-xs" title="Team Captain">👑</span>}
                           {isMe && <Badge className="text-[10px] h-4 px-1.5">You</Badge>}
                         </p>
                         <p className="truncate text-sm text-muted-foreground">
-                          {member.role === 'admin' ? 'Admin / Captain' : 'Student'}
+                          {member.role === 'admin' ? 'Admin' : member.isCaptain ? 'Student • Captain' : 'Student'}
                         </p>
                       </div>
                     </div>

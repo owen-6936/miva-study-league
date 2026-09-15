@@ -22,13 +22,12 @@ export function MissionPortalPage() {
     const fetchMissions = async () => {
       try {
         const [currentRes, pastRes] = await Promise.all([
-          apiClient.get('/users/me/missions/current').catch(() => apiClient.get('/users/me/missions/current')),
-          apiClient.get('/users/me/missions/past').catch(() => apiClient.get('/users/me/missions/past')),
+          apiClient.get('/missions/current'),
+          apiClient.get('/users/me/missions/past').catch(() => ({ data: {} })),
         ]);
 
-        // Support both old backend schemas and the new array responses
-        const currentMissions = currentRes.data.currentMissions || currentRes.data.missions || currentRes.data || [];
-        setActiveMissions(currentMissions);
+        const currentMissions = currentRes.data.missions || currentRes.data.currentMissions || currentRes.data || [];
+        setActiveMissions(Array.isArray(currentMissions) ? currentMissions : []);
 
         const pastData = pastRes.data || {};
         const history = [
@@ -51,7 +50,7 @@ export function MissionPortalPage() {
     fetchMissions();
   }, []);
 
-  const activeMission = activeMissions[0]; // For now, just feature the first active one
+
 
   if (loading) {
     return (
@@ -72,8 +71,11 @@ export function MissionPortalPage() {
         </p>
       </div>
 
-      {activeMission ? (
+      {activeMissions.length > 0 ? (
+        <div className="space-y-6">
+          {activeMissions.map((activeMission) => (
         <motion.div
+              key={activeMission.id}
           initial={{ opacity: 1, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -149,6 +151,8 @@ export function MissionPortalPage() {
             </CardContent>
           </Card>
         </motion.div>
+          ))}
+        </div>
       ) : (
         <div className="text-center py-12 bg-surface rounded-xl border border-border border-dashed">
           <p className="text-muted-foreground">No active missions right now.</p>
@@ -160,22 +164,22 @@ export function MissionPortalPage() {
 
         {pastMissions.length > 0 ? (
           <div className="space-y-4">
-            {pastMissions.map((mission) => (
+            {pastMissions.map((mission, idx) => (
               <Card key={mission.id} className="bg-surface border-border">
                 <CardContent className="p-0">
                   <button
                     className="w-full p-4 text-left transition-colors hover:bg-muted/50 sm:p-6"
                     onClick={() =>
                       setExpandedWeek(
-                        expandedWeek === (0) ? null : (0),
+                        expandedWeek === idx ? null : idx,
                       )
                     }
                     type="button"
                   >
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex items-center gap-3 sm:gap-4">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 font-bold text-primary">
-                          Mission
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 font-bold text-primary text-xs">
+                          #{idx + 1}
                         </div>
                         <div>
                           <h3 className="font-medium">{mission.title}</h3>
@@ -184,16 +188,16 @@ export function MissionPortalPage() {
                       </div>
                       <div className="flex items-center gap-3 self-end sm:gap-4 sm:self-auto">
                         <Badge variant="default" className="shrink-0">
-                          Completed
+                          {(mission as Mission & { status?: string }).status === 'expired' ? 'Expired' : 'Completed'}
                         </Badge>
                         <ChevronDown
-                          className={`h-5 w-5 text-muted-foreground transition-transform ${expandedWeek === 0 ? 'rotate-180' : ''}`}
+                          className={`h-5 w-5 text-muted-foreground transition-transform ${expandedWeek === idx ? 'rotate-180' : ''}`}
                         />
                       </div>
                     </div>
                   </button>
 
-                  {expandedWeek === 0 && (
+                  {expandedWeek === idx && (
                     <motion.div
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}

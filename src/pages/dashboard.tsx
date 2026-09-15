@@ -98,7 +98,8 @@ export function Dashboard() {
 
   const [topTeams, setTopTeams] = useState<Team[]>([]);
   const [stats, setStats] = useState({ teamRank: 0, personalPoints: 0, weekProgress: 0 });
-  const [currentMission, setCurrentMission] = useState<Mission | null>(null);
+  const [currentMissions, setCurrentMissions] = useState<Mission[]>([]);
+  const [activeMissionIdx, setActiveMissionIdx] = useState(0);
   const [activities, setActivities] = useState<DashboardActivity[]>([]);
   const [announcements, setAnnouncements] = useState<DashboardAnnouncement[]>([]);
   const [activeAnnouncement, setActiveAnnouncement] = useState(0);
@@ -122,11 +123,9 @@ export function Dashboard() {
       }
 
       try {
-        const missionRes = await apiClient.get('/users/me/missions/current').catch(() => apiClient.get('/me/missions/current'));
-        const missions = missionRes.data.currentMissions || missionRes.data.missions || missionRes.data || [];
-        if (missions.length > 0) {
-          setCurrentMission(missions[0]);
-        }
+        const missionRes = await apiClient.get('/missions/current');
+        const missions = missionRes.data.missions || missionRes.data.currentMissions || missionRes.data || [];
+        setCurrentMissions(Array.isArray(missions) ? missions : []);
       } catch (error) {
         console.error('Failed to load current mission', error);
       }
@@ -300,8 +299,8 @@ export function Dashboard() {
                   {stat.isProgress ? (
                     `${stat.value}${stat.suffix}`
                   ) : stat.isTimer ? (
-                    currentMission?.deadline ? (
-                      <CountdownTimer targetDate={currentMission.deadline} />
+                    currentMissions[0]?.deadline ? (
+                      <CountdownTimer targetDate={currentMissions[0].deadline} />
                     ) : (
                       <span className="text-base text-muted-foreground font-normal">N/A</span>
                     )
@@ -406,46 +405,76 @@ export function Dashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {currentMission ? (
+                {currentMissions.length > 0 ? (
                   <>
-                    <div className="mb-4">
-                      <h3 className="text-lg font-bold">{currentMission.title}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Course: {currentMission.courseId}
-                      </p>
+                    <div className="relative overflow-hidden min-h-[140px]">
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={activeMissionIdx}
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -20 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <div className="mb-4">
+                            <h3 className="text-lg font-bold">{currentMissions[activeMissionIdx]?.title}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              Course: {currentMissions[activeMissionIdx]?.courseId}
+                            </p>
+                          </div>
+                          <div className="space-y-2 mb-6">
+                            <div className="flex justify-between text-sm">
+                              <span>
+                                {currentMissions[activeMissionIdx]?.tasks?.length || 0} tasks
+                              </span>
+                              <span className="font-medium text-primary">
+                                {currentMissions[activeMissionIdx]?.basePoints || 0} XP
+                              </span>
+                            </div>
+                            <Progress
+                              value={0}
+                              className="h-2"
+                            />
+                          </div>
+                          <div className="flex gap-4">
+                            <Link
+                              to={`/missions/${currentMissions[activeMissionIdx]?.id || 'current'}`}
+                              className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2"
+                            >
+                              View Mission <ChevronRight className="w-4 h-4 ml-1" />
+                            </Link>
+                          </div>
+                        </motion.div>
+                      </AnimatePresence>
                     </div>
-                    <div className="space-y-2 mb-6">
-                      <div className="flex justify-between text-sm">
-                        <span>
-                          Progress: {currentMission.tasks?.length || 0}/
-                          {currentMission.tasks?.length || 1} tasks
-                        </span>
-                        <span className="font-medium">
-                          {Math.round(
-                            ((currentMission.tasks?.length || 0) /
-                              (currentMission.tasks?.length || 1)) *
-                              100,
-                          )}
-                          %
-                        </span>
+
+                    {currentMissions.length > 1 && (
+                      <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/50">
+                        <div className="flex gap-1">
+                          {currentMissions.map((_, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() => setActiveMissionIdx(idx)}
+                              className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${idx === activeMissionIdx ? 'w-4 bg-primary' : 'w-1.5 bg-primary/30'}`}
+                            />
+                          ))}
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => setActiveMissionIdx((prev) => prev === 0 ? currentMissions.length - 1 : prev - 1)}
+                            className="p-1 rounded-md hover:bg-primary/20 text-primary transition-colors cursor-pointer"
+                          >
+                            <ChevronLeft className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => setActiveMissionIdx((prev) => (prev + 1) % currentMissions.length)}
+                            className="p-1 rounded-md hover:bg-primary/20 text-primary transition-colors cursor-pointer"
+                          >
+                            <ChevronRight className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
-                      <Progress
-                        value={
-                          ((currentMission.tasks?.length || 0) /
-                            (currentMission.tasks?.length || 1)) *
-                          100
-                        }
-                        className="h-2"
-                      />
-                    </div>
-                    <div className="flex gap-4">
-                      <Link
-                        to={`/missions/${currentMission.id || 'current'}`}
-                        className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2"
-                      >
-                        View Mission <ChevronRight className="w-4 h-4 ml-1" />
-                      </Link>
-                    </div>
+                    )}
                   </>
                 ) : (
                   <div className="py-6 text-center">

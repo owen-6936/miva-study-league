@@ -74,6 +74,11 @@ Users with the `admin` role have access to the `/admin` route which includes:
 
 ## 📦 Changelog
 
+### v1.6.2 (Mission Portal UX Overhaul)
+- **Course Filter Bar**: Added pill-style filter buttons to the Mission Portal. Students can view "All Courses" or tap a specific course to filter both active missions and the archive. Each pill shows the mission count.
+- **Oldest → Newest Sort**: Active and past missions are now sorted chronologically (oldest first) so students see Week 1 before Week 2.
+- **Announcements Fixed Height**: The dashboard announcements carousel now uses a locked `80px` container with internal scroll, preventing long announcements from pushing the layout around.
+
 ### v1.6.1 (Mission Visibility Fix)
 - **Correct Mission Endpoint**: Switched both the Mission Portal and Dashboard from `/users/me/missions/current` (user-specific) to `/missions/current` (all active platform missions with future deadlines). All published missions now appear correctly.
 - **Multi-Mission Support**: The Mission Portal now renders every active mission as its own full card instead of hard-coding to only the first one.

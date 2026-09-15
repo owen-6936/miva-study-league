@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { CountdownTimer } from '@/components/ui/countdown-timer';
 import { ChevronDown, ChevronRight, Trophy } from 'lucide-react';
 import { useNavigate } from 'react-router';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { apiClient } from '@/lib/api/client';
 import type { Mission } from "@/lib/api/types";
 
@@ -17,6 +17,7 @@ export function MissionPortalPage() {
   const [activeMissions, setActiveMissions] = useState<Mission[]>([]);
   const [pastMissions, setPastMissions] = useState<Mission[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCourse, setSelectedCourse] = useState<string>('all');
 
   useEffect(() => {
     const fetchMissions = async () => {
@@ -52,6 +53,28 @@ export function MissionPortalPage() {
 
 
 
+  const courses = useMemo(() => {
+    const set = new Set([
+      ...activeMissions.map(m => m.courseId || 'General'),
+      ...pastMissions.map(m => m.courseId || 'General'),
+    ]);
+    return Array.from(set).sort();
+  }, [activeMissions, pastMissions]);
+
+  const filteredMissions = useMemo(() => {
+    const list = selectedCourse === 'all'
+      ? [...activeMissions]
+      : activeMissions.filter(m => (m.courseId || 'General') === selectedCourse);
+    return list.sort((a, b) => new Date(a.createdAt || a.deadline).getTime() - new Date(b.createdAt || b.deadline).getTime());
+  }, [activeMissions, selectedCourse]);
+
+  const filteredPastMissions = useMemo(() => {
+    const list = selectedCourse === 'all'
+      ? [...pastMissions]
+      : pastMissions.filter(m => (m.courseId || 'General') === selectedCourse);
+    return list.sort((a, b) => new Date(a.createdAt || a.deadline).getTime() - new Date(b.createdAt || b.deadline).getTime());
+  }, [pastMissions, selectedCourse]);
+
   if (loading) {
     return (
       <div className="py-20 text-center text-muted-foreground animate-pulse">
@@ -71,9 +94,34 @@ export function MissionPortalPage() {
         </p>
       </div>
 
-      {activeMissions.length > 0 ? (
+      {/* Course Filter */}
+      {courses.length > 1 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant={selectedCourse === 'all' ? 'primary' : 'outline'}
+            size="sm"
+            onClick={() => setSelectedCourse('all')}
+            className="rounded-full text-xs h-8"
+          >
+            All Courses ({activeMissions.length})
+          </Button>
+          {courses.map(course => (
+            <Button
+              key={course}
+              variant={selectedCourse === course ? 'primary' : 'outline'}
+              size="sm"
+              onClick={() => setSelectedCourse(course)}
+              className="rounded-full text-xs h-8"
+            >
+              {course} ({activeMissions.filter(m => (m.courseId || 'General') === course).length})
+            </Button>
+          ))}
+        </div>
+      )}
+
+      {filteredMissions.length > 0 ? (
         <div className="space-y-6">
-          {activeMissions.map((activeMission) => (
+          {filteredMissions.map((activeMission) => (
         <motion.div
               key={activeMission.id}
           initial={{ opacity: 1, y: 20 }}
@@ -155,16 +203,18 @@ export function MissionPortalPage() {
         </div>
       ) : (
         <div className="text-center py-12 bg-surface rounded-xl border border-border border-dashed">
-          <p className="text-muted-foreground">No active missions right now.</p>
+          <p className="text-muted-foreground">
+            {selectedCourse === 'all' ? 'No active missions right now.' : `No active missions for ${selectedCourse}.`}
+          </p>
         </div>
       )}
 
       <div className="space-y-6">
         <h2 className="text-2xl font-bold font-heading">Mission Archive</h2>
 
-        {pastMissions.length > 0 ? (
+        {filteredPastMissions.length > 0 ? (
           <div className="space-y-4">
-            {pastMissions.map((mission, idx) => (
+            {filteredPastMissions.map((mission, idx) => (
               <Card key={mission.id} className="bg-surface border-border">
                 <CardContent className="p-0">
                   <button
@@ -225,7 +275,9 @@ export function MissionPortalPage() {
             ))}
           </div>
         ) : (
-          <p className="text-muted-foreground">No past missions.</p>
+          <p className="text-muted-foreground">
+            {selectedCourse === 'all' ? 'No past missions.' : `No past missions for ${selectedCourse}.`}
+          </p>
         )}
       </div>
     </div>

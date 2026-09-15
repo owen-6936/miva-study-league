@@ -50,6 +50,7 @@ export interface User {
   role: UserRole;
   teamId: string | null;
   team?: string;
+  isCaptain?: boolean;
   avatarUrl: string | null;
   transferTokens: number;
   graceDeadline: string | null;
@@ -87,7 +88,7 @@ export interface Team {
   members: User[];
   points: number;
   point?: number; // legacy
-  captainId?: string;
+  captainId?: User | null;
   rank?: number;
   createdAt: string;
   updatedAt: string;
@@ -144,6 +145,12 @@ export interface MissionTask {
 /** Weekly mission model. */
 export interface Mission {
   id: string;
+  firstBlood?: {
+    userId: string;
+    name: string;
+    team: string;
+    completedAt: string;
+  };
   title: string;
   courseId: string;
   

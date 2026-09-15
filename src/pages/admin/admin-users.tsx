@@ -5,7 +5,8 @@ import { DataTable } from '@/components/ui/data-table';
 import type { Column } from '@/components/ui/data-table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Search, Filter, Loader2 } from 'lucide-react';
+import { Link } from 'react-router';
+import { Search, Filter, Loader2, Save, Edit3, Users } from 'lucide-react';
 import { apiClient } from '@/lib/api/client';
 import { toast } from 'sonner';
 
@@ -17,8 +18,9 @@ interface AdminUserRow {
   team: string | null;
   role: 'admin' | 'student';
   verified: boolean;
-  transferTokens?: number;
+  teamTransferTokens?: number;
   _id?: string;
+  isCaptain?: boolean;
 }
 
 export function AdminUsersPage() {
@@ -26,6 +28,8 @@ export function AdminUsersPage() {
   const [users, setUsers] = useState<AdminUserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [isGranting, setIsGranting] = useState<string | null>(null);
+  const [editingTokens, setEditingTokens] = useState<Record<string, string>>({});
+  const [bulkTokenLoading, setBulkTokenLoading] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -43,21 +47,40 @@ export function AdminUsersPage() {
     }
   };
 
-  const handleGrantToken = async (userId: string) => {
+  const handleSetTokens = async (userId: string) => {
+    const amount = editingTokens[userId];
+    if (amount === undefined) return;
+    
     setIsGranting(userId);
     try {
-      await apiClient.post(`/admin/users/${userId}/grant-token`);
-      toast.success('Transfer token granted to student!');
-      
-      // Optimistically update the UI
-      setUsers(users.map(u => (u.id === userId || u._id === userId) ? { ...u, transferTokens: (u.transferTokens || 0) + 1 } : u));
+      await apiClient.patch(`/admin/users/${userId}/tokens`, { teamTransferTokens: Number(amount) });
+      toast.success('Transfer tokens updated!');
+      setUsers(users.map(u => (u.id === userId || u._id === userId) ? { ...u, transferTokens: Number(amount) } : u));
+      const newEditing = { ...editingTokens };
+      delete newEditing[userId];
+      setEditingTokens(newEditing);
     } catch {
-      toast.error('Failed to grant transfer token');
+      toast.error('Failed to update tokens');
     } finally {
       setIsGranting(null);
     }
   };
 
+  const handleBulkResetTokens = async () => {
+    const amount = window.prompt("Enter the exact number of transfer tokens to give EVERY student (e.g., 0 to reset, 1 for a new week):", "0");
+    if (amount === null || isNaN(Number(amount))) return;
+    
+    setBulkTokenLoading(true);
+    try {
+      await apiClient.post(`/admin/users/bulk-tokens`, { teamTransferTokens: Number(amount) });
+      toast.success(`Successfully set every student's tokens to ${amount}`);
+      setUsers(users.map(u => ({ ...u, transferTokens: Number(amount) })));
+    } catch {
+      toast.error('Failed to run bulk token update');
+    } finally {
+      setBulkTokenLoading(false);
+    }
+  };
   const columns: Column<AdminUserRow>[] = [
     { header: 'Name', accessorKey: 'name' },
     { header: 'Email', accessorKey: 'email' },
@@ -105,24 +128,42 @@ export function AdminUsersPage() {
     },
     {
       header: 'Tokens',
-      cell: (row) => (
-        <span className="font-mono text-sm font-bold">
-          {row.transferTokens || 0}
-        </span>
-      ),
+      cell: (row) => {
+        const rowId = row.id || row._id!;
+        const isEditing = editingTokens[rowId] !== undefined;
+        return isEditing ? (
+          <div className="flex items-center gap-2">
+            <Input 
+              type="number" 
+              className="w-16 h-8 text-xs font-mono" 
+              value={editingTokens[rowId]} 
+              onChange={e => setEditingTokens({ ...editingTokens, [rowId]: e.target.value })}
+              autoFocus
+            />
+            <Button size="sm" className="h-8 w-8 p-0" onClick={() => handleSetTokens(rowId)} disabled={isGranting === rowId}>
+              {isGranting === rowId ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+            </Button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-sm font-bold w-6">{row.teamTransferTokens || 0}</span>
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-muted-foreground hover:text-primary" onClick={() => setEditingTokens({ ...editingTokens, [rowId]: String(row.teamTransferTokens || 0) })}>
+              <Edit3 className="w-3 h-3" />
+            </Button>
+          </div>
+        );
+      },
     },
     {
       header: 'Actions',
       cell: (row) => (
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="text-xs"
-          onClick={() => handleGrantToken(row.id || row._id!)}
-          disabled={isGranting === (row.id || row._id)}
-        >
-          {isGranting === (row.id || row._id) ? <Loader2 className="w-3 h-3 animate-spin" /> : '+ Token'}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Link to={`/admin/users/${row.id || row._id}/progress`}>
+            <Button variant="outline" size="sm" className="text-xs border-primary/20 hover:bg-primary/10 h-8">
+              View Progress
+            </Button>
+          </Link>
+        </div>
       ),
     },
   ];
@@ -154,15 +195,18 @@ export function AdminUsersPage() {
               />
             </div>
             <div className="flex gap-2">
+              <Button variant="outline" onClick={handleBulkResetTokens} disabled={bulkTokenLoading} className="gap-2 border-amber-500/30 text-amber-500 hover:bg-amber-500/10">
+                {bulkTokenLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Users className="h-4 w-4" />} Bulk Token Reset
+              </Button>
               <Button variant="outline" className="gap-2">
                 <Filter className="h-4 w-4" /> Filter
               </Button>
             </div>
           </div>
 
-          <div className="border border-border rounded-md min-h-[300px]">
+          <div className="border border-border rounded-md min-h-75">
             {loading ? (
-              <div className="flex items-center justify-center h-[300px]">
+              <div className="flex items-center justify-center h-75">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : (

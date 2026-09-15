@@ -123,6 +123,21 @@ export const AdminSubmissionsPage = () => {
                         <a href={submission.content} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline break-all">
                           {submission.content}
                         </a>
+                      ) : task.type === 'QUIZ' ? (
+                        <div className="space-y-2">
+                          {(() => {
+                            try {
+                              const answers = JSON.parse(submission.content || '{}');
+                              return Object.entries(answers).map(([qId, ans]) => (
+                                <div key={qId} className="bg-background p-2 rounded border text-sm">
+                                  <span className="text-muted-foreground">Q-ID {qId.slice(-4)}:</span> <span className="font-mono font-bold">{ans as string}</span>
+                                </div>
+                              ));
+                            } catch {
+                              return <p className="whitespace-pre-wrap text-destructive">Failed to parse quiz data: {submission.content}</p>;
+                            }
+                          })()}
+                        </div>
                       ) : (
                         <p className="whitespace-pre-wrap">{submission.content}</p>
                       )}

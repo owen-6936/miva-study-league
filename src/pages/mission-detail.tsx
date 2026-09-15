@@ -175,7 +175,7 @@ export function MissionDetailPage() {
                         <div className="w-full aspect-video border-t border-border bg-black/5 flex items-center justify-center">
                           <iframe 
                             src={getDrivePreviewUrl(res.url)} 
-                            className="w-full h-full min-h-[300px]"
+                            className="w-full h-full min-h-75"
                             allow="autoplay; encrypted-media" 
                             allowFullScreen 
                           />
@@ -268,7 +268,7 @@ export function MissionDetailPage() {
                             {task.type === 'TEXT_RESPONSE' && (
                         <textarea 
                           placeholder="Type your answer here..."
-                          className="w-full min-h-[120px] p-3 rounded-md border border-input bg-background text-sm"
+                          className="w-full min-h-30 p-3 rounded-md border border-input bg-background text-sm"
                           value={submissions[task.id] || ''}
                           onChange={(e) => setSubmissions({ ...submissions, [task.id]: e.target.value })}
                         />

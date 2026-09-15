@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CountdownTimer } from '@/components/ui/countdown-timer';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, Trophy } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api/client';
@@ -21,19 +21,25 @@ export function MissionPortalPage() {
   useEffect(() => {
     const fetchMissions = async () => {
       try {
-        const [currentRes, meRes] = await Promise.all([
-          apiClient.get('/missions/current'),
-          apiClient.get('/users/me/missions'),
+        const [currentRes, pastRes] = await Promise.all([
+          apiClient.get('/users/me/missions/current').catch(() => apiClient.get('/users/me/missions/current')),
+          apiClient.get('/users/me/missions/past').catch(() => apiClient.get('/users/me/missions/past')),
         ]);
 
-        setActiveMissions(currentRes.data.missions || []);
+        // Support both old backend schemas and the new array responses
+        const currentMissions = currentRes.data.currentMissions || currentRes.data.missions || currentRes.data || [];
+        setActiveMissions(currentMissions);
 
+        const pastData = pastRes.data || {};
         const history = [
-          ...(meRes.data.completedMissions || []).map((m: unknown) => ({
+          ...(pastData.completedMissions || []).map((m: unknown) => ({
             ...(m as Mission),
             status: 'completed',
           })),
-          ...(meRes.data.pastMissions || []).map((m: Mission) => ({ ...(m as Mission), status: 'expired' })),
+          ...(pastData.pastMissions || []).map((m: Mission) => ({ 
+            ...(m as Mission), 
+            status: 'expired' 
+          })),
         ];
         setPastMissions(history);
       } catch (error) {
@@ -112,12 +118,26 @@ export function MissionPortalPage() {
                 </div>
               </div>
 
+              {activeMission.firstBlood && (
+                <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 sm:p-5 flex items-center gap-4">
+                  <div className="p-3 bg-amber-500/20 rounded-full text-amber-500">
+                    <Trophy className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="text-amber-500 font-bold uppercase text-xs tracking-wider">First Blood Claimed!</h4>
+                    <p className="text-sm font-medium mt-0.5">
+                      {activeMission.firstBlood.name} <span className="opacity-70 font-normal">({activeMission.firstBlood.team})</span> beat you to it!
+                    </p>
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-3">
                 <h3 className="font-medium">Mission Tasks</h3>
                 <ul className="space-y-2">
                   {activeMission.tasks?.map((task, idx) => (
                     <li key={task.id || idx} className="flex items-start gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
                       <span className="text-muted-foreground">{task.title} <span className="text-xs ml-1 opacity-70">({task.points} XP)</span></span>
                     </li>
                   ))}
@@ -177,8 +197,16 @@ export function MissionPortalPage() {
                     <motion.div
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
-                      className="border-t border-border p-6 bg-muted/20"
+                      className="border-t border-border p-6 bg-muted/20 space-y-4"
                     >
+                      {mission.firstBlood && (
+                        <div className="flex items-center gap-3 mb-4 text-sm bg-background p-3 rounded-lg border border-border w-fit">
+                          <Trophy className="w-4 h-4 text-amber-500" />
+                          <span className="font-medium text-muted-foreground">Champion:</span>
+                          <span className="font-bold">{mission.firstBlood.name}</span>
+                          <Badge variant="warning" className="text-xs bg-amber-500/10 text-amber-500 border-amber-500/20">FIRST BLOOD</Badge>
+                        </div>
+                      )}
                       <Button
                         variant="outline"
                         size="sm"

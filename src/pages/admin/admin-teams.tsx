@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Modal } from '@/components/ui/modal';
 import { TEAM_EMOJIS } from '@/lib/utils';
-import { Users, Edit2, ArrowRightLeft, Loader2, Database, Trash2 } from 'lucide-react';
+import { Users, Edit2, ArrowRightLeft, Loader2, Database, Trash2, Crown } from 'lucide-react';
 import { apiClient } from '@/lib/api/client';
 import { getApiError } from '@/lib/api/client';
 import { toast } from 'sonner';
@@ -25,6 +25,9 @@ export function AdminTeamsPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
+
+  const [isRosterOpen, setIsRosterOpen] = useState(false);
+  const [selectedRosterTeam, setSelectedRosterTeam] = useState<Team | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -50,6 +53,25 @@ export function AdminTeamsPage() {
       slogan: team.slogan || '',
     });
     setIsEditOpen(true);
+  };
+
+  const handleToggleCaptain = async (userId: string, currentStatus: boolean) => {
+    try {
+      await apiClient.patch(`/admin/users/${userId}/captain`, { isCaptain: !currentStatus });
+      toast.success(`User is ${!currentStatus ? 'now' : 'no longer'} a Team Captain!`);
+      // Update local state to reflect change instantly in the modal without full refetch
+      if (selectedRosterTeam) {
+        setSelectedRosterTeam({
+          ...selectedRosterTeam,
+          members: selectedRosterTeam.members.map((m: any) => 
+            (m.id === userId || m._id === userId) ? { ...m, isCaptain: !currentStatus } : m
+          )
+        });
+      }
+      fetchTeams(); // Background sync
+    } catch (error) {
+      toast.error('Failed to update captain status');
+    }
   };
 
   const handleCreateTeam = async (e: React.FormEvent) => {
@@ -219,16 +241,34 @@ export function AdminTeamsPage() {
                 <p className="text-sm text-muted-foreground mt-2 italic">"{team.slogan}"</p>
               </CardHeader>
               <CardContent className="p-4 flex-1 flex flex-col justify-between gap-4">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="flex items-center gap-2 text-muted-foreground">
-                    <Users className="h-4 w-4" /> Members
-                  </span>
-                  <span className="font-bold">
-                    {team.members?.length || 0}/{team.maxMembers || 20}
-                  </span>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="flex items-center gap-2 text-muted-foreground">
+                      <Users className="h-4 w-4" /> Members
+                    </span>
+                    <span className="font-bold">
+                      {team.members?.length || 0}/{team.maxMembers || 20}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between text-sm bg-yellow-500/10 p-2 rounded-md border border-yellow-500/20">
+                    <span className="flex items-center gap-2 text-yellow-600 font-medium">
+                      <Crown className="h-4 w-4" /> Captain
+                    </span>
+                    <span className="font-bold text-yellow-600 truncate max-w-[120px]">
+                      {team.captainId ? team.captainId.name : 'None'}
+                    </span>
+                  </div>
                 </div>
 
-                <Button variant="outline" className="w-full gap-2">
+                <Button 
+                  variant="outline" 
+                  className="w-full gap-2"
+                  onClick={() => {
+                    setSelectedRosterTeam(team);
+                    setIsRosterOpen(true);
+                  }}
+                >
                   <ArrowRightLeft className="h-4 w-4" /> Manage Roster
                 </Button>
               </CardContent>
@@ -238,6 +278,35 @@ export function AdminTeamsPage() {
       )}
 
       {/* Modals */}
+      <Modal isOpen={isRosterOpen} onClose={() => setIsRosterOpen(false)} title={`Manage Roster: Team ${selectedRosterTeam?.name}`}>
+        <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+          {(!selectedRosterTeam?.members || selectedRosterTeam.members.length === 0) ? (
+            <p className="text-center text-muted-foreground py-8">No members in this team yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {selectedRosterTeam.members.map((member: any) => (
+                <div key={member.id || member._id} className="flex items-center justify-between p-3 rounded-lg border bg-card">
+                  <div>
+                    <p className="font-medium flex items-center gap-2">
+                      {member.name}
+                      {member.isCaptain && <Crown className="w-4 h-4 text-yellow-500" />}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{member.email}</p>
+                  </div>
+                  <Button
+                    variant={member.isCaptain ? "primary" : "outline"}
+                    size="sm"
+                    className={member.isCaptain ? "bg-yellow-500 hover:bg-yellow-600 text-white" : ""}
+                    onClick={() => handleToggleCaptain(member.id || member._id, !!member.isCaptain)}
+                  >
+                    {member.isCaptain ? "Revoke Captain" : "Make Captain"}
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </Modal>
       <Modal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} title="Create New Team">
         <form onSubmit={handleCreateTeam} className="space-y-4">
           <div className="space-y-2">

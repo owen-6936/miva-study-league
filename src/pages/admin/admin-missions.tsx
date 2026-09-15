@@ -1,3 +1,5 @@
+import { Users } from 'lucide-react';
+import { Link } from 'react-router';
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -169,10 +171,15 @@ export function AdminMissionsPage() {
       header: 'Actions',
       cell: (row: Mission) => (
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" className="h-8 w-8 text-blue-500" onClick={() => handleEdit(row)}>
+          <Link to={`/admin/missions/${row.id}/participants`}>
+            <Button variant="outline" size="sm" className="text-xs h-8">
+              <Users className="h-3 w-3 mr-1" /> Roster
+            </Button>
+          </Link>
+          <Button variant="ghost" size="sm" className="h-8 w-8 text-blue-500 p-0" onClick={() => handleEdit(row)}>
             <Edit className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="sm" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(row.id)}>
+          <Button variant="ghost" size="sm" className="h-8 w-8 text-destructive hover:text-destructive p-0" onClick={() => handleDelete(row.id)}>
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
@@ -215,7 +222,7 @@ export function AdminMissionsPage() {
                 <div className="space-y-2">
                   <Label>Story Brief (Markdown Supported)</Label>
                   <textarea 
-                    className="w-full min-h-[150px] p-3 rounded-md border border-input bg-background text-sm"
+                    className="w-full min-h-37.5 p-3 rounded-md border border-input bg-background text-sm"
                     value={storyBrief}
                     onChange={e => setStoryBrief(e.target.value)}
                     placeholder="Hackers have encrypted the school's database! To generate the decryption key, you need to solve these 5 calculus integrals..."

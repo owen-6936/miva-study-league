@@ -73,6 +73,23 @@ Users with the `admin` role have access to the `/admin` route which includes:
 
 ## 📦 Changelog
 
+### v1.5.2 (The Gamification Update)
+- **Hall of Fame & Secret Cash Prizes**: Unlocked a dynamic end-of-season Hall of Fame celebrating the top 3 Global Scholars, top 3 Teams, and the fastest Mission Speedrunners. Added a dynamic prize banner announcing a tiered cash distribution system for the winning team!
+- **Mission Roster Analytics**: Rebuilt the Admin Teams page to include a powerful "Manage Roster" modal, alongside a dedicated `/admin/missions/:id/participants` roster view to track task completion rates and XP per student.
+- **Team Captains**: Admins can now instantly promote or demote students to "Team Captain" from within the Roster Modal. Captains get an exclusive Gold Crown badge platform-wide.
+- **First Blood Widget**: The Mission Portal dynamically tracks and permanently celebrates the first student to finish a mission with an animated Trophy banner.
+- **Visualized XP Growth Trajectory**: The Student Profile page now features an interactive Recharts Area chart plotting their exact XP growth over time.
+- **Inline Admin Controls**: Added inline input editing for Transfer Tokens directly in the Admin Users table, plus a "Bulk Token Reset" feature for weekly resets.
+- **Admin Specific User Grading UI**: Added a dedicated `admin-user-progress.tsx` interface to drill down into a specific student's submissions and manually override points.
+
+### v1.4.0
+- **TypeScript Strictness Overhaul**: Eliminated all remaining `any` types across the codebase. Enforced strict typing for API error handling (`AxiosError`) and API domain models (Teams, Missions, Users).
+- **Maintenance Mode Gateway**: Injected robust maintenance mode logic into the Auth workflow, instantly evicting non-admin users with a toast alert.
+- **Intelligent Dual-Routing for Missions**: Refactored the dashboard to pull from separate `/users/me/missions/current` and `/users/me/missions/past` endpoints, preventing completed tasks from cluttering the active workspace.
+- **Double Submission Prevention**: Added robust boolean locks (`submittingTaskId`) and spinning loaders to prevent spam-clicking submissions.
+- **Admin JSON Quiz Parser**: Rebuilt the Manual Grading Queue to cleanly parse and format raw JSON payloads for Quiz tasks if the auto-grader fails.
+- **Google Drive iFrame Fix**: Wrote a custom Regex parser to safely extract raw file IDs from Google Drive links, preventing broken preview routing.
+
 ### v1.2.1
 - **Announcement Expiration**: The Student Dashboard now natively supports an `expiresAt` property for announcements, automatically hiding them once their time has passed.
 - **Leaderboard Resilience**: Improved the leaderboard parser to handle dynamic payload keys (`users` vs `topUsers`) and elegantly fallback to `fullName` if `name` is missing.

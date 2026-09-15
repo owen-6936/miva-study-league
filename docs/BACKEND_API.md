@@ -453,3 +453,52 @@ export interface DashboardAnnouncement {
 }
 ```
 *Note: Your backend can also filter by `expiresAt` directly to save payload bandwidth.*
+
+## 7. Extended Admin Controls (v1.5.0)
+The frontend features advanced admin overrides and team roster management.
+
+### User Overrides
+*   `PATCH /api/v1/admin/users/:userId/tokens`: Update individual team transfer tokens (Payload: `{ teamTransferTokens: 2 }`).
+*   `POST /api/v1/admin/users/bulk-tokens`: Bulk update tokens for all students (Payload: `{ teamTransferTokens: 0 }`).
+*   `PATCH /api/v1/admin/users/:userId/captain`: Promotes or demotes a student as Team Captain (Payload: `{ isCaptain: true }`).
+*   `GET /api/v1/admin/missions/:missionId/participants`: Fetches mission-specific roster and stats for admins.
+
+## 8. Gamification & Awards (v1.5.0)
+The platform handles end-of-season Hall of Fame stats and analytics.
+
+### Hall of Fame
+`GET /api/v1/awards/hall-of-fame`
+Returns a perfectly synced overview of the best scholars, teams, and speedrunners.
+
+**JSON Schema Expectation:**
+```json
+{
+  "topPlayers": [
+    { "id": "1", "name": "Owen", "team": "Alpha", "points": 1200 }
+  ],
+  "topTeams": [
+    { "name": "Alpha", "points": 4500 }
+  ],
+  "recentChampions": [
+    { "missionTitle": "Week 1", "playerName": "Owen", "team": "Alpha", "completedAt": "2026-09-14T08:00:00Z" }
+  ]
+}
+```
+
+### Student Analytics
+`GET /api/v1/users/me/analytics`
+Feeds the frontend Recharts line graph with historical XP progress.
+**JSON Schema Expectation:**
+```json
+{
+  "timeline": [
+    { "date": "Week 1", "xp": 50 },
+    { "date": "Week 2", "xp": 250 }
+  ]
+}
+```
+
+### Team Captains Integration
+`User` models now officially support `isCaptain: boolean`. 
+`Team` models now populate `captainId: { _id, name, email, role, isCaptain }`.
+The frontend expects these fields to accurately display Team Captain badges on the Profile, Roster, and Team Cards.

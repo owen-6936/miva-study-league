@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { TEAM_COLORS, TEAM_EMOJIS, cn } from '@/lib/utils';
-import { ArrowRight, Swords, Trophy, Users, Loader2 } from 'lucide-react';
+import { ArrowRight, Swords, Trophy, Users, Loader2 , Crown } from 'lucide-react';
 import { apiClient } from '@/lib/api/client';
 import { getApiError } from '@/lib/api/client';
 import { useAuthStore } from '@/lib/stores/auth-store';
@@ -41,6 +41,7 @@ interface Team {
   name: string;
   members: string[];
   maxMembers: number;
+  captainId?: any;
   points?: number; point?: number;
 }
 
@@ -177,17 +178,25 @@ export function TeamsOverview() {
                   </div>
 
                   <div className="mt-auto w-full space-y-3 pt-4">
-                    <div className="flex items-center justify-center gap-3">
-                      <Badge variant="default" className="flex items-center gap-1">
-                        <Users className="h-3 w-3" />
-                        {memberCount}/{team.maxMembers}
-                      </Badge>
-                      <Badge className="border-0 bg-primary/10 text-primary hover:bg-primary/20">
-                        Rank #{rank}
-                      </Badge>
-                      <Badge className="border border-border/50 bg-transparent text-muted-foreground hover:bg-transparent">
-                        {team.points || team.point || 0} pts
-                      </Badge>
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="flex items-center justify-center gap-3">
+                        <Badge variant="default" className="flex items-center gap-1">
+                          <Users className="h-3 w-3" />
+                          {memberCount}/{team.maxMembers}
+                        </Badge>
+                        <Badge className="border-0 bg-primary/10 text-primary hover:bg-primary/20">
+                          Rank #{rank}
+                        </Badge>
+                        <Badge className="border border-border/50 bg-transparent text-muted-foreground hover:bg-transparent">
+                          {team.points || team.point || 0} pts
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-center gap-2 bg-yellow-500/10 text-yellow-600 px-3 py-1 rounded-full text-xs font-bold border border-yellow-500/20 w-fit">
+                        <Crown className="w-3.5 h-3.5" /> 
+                        <span className="truncate max-w-[150px]">
+                          {team.captainId ? team.captainId.name : 'No Captain'}
+                        </span>
+                      </div>
                     </div>
 
                     <div className="rounded-lg border border-border/70 bg-secondary/15 p-3 text-left">

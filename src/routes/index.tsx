@@ -52,11 +52,17 @@ const AdminDashboard = lazy(() =>
 const AdminUsers = lazy(() =>
   import('@/pages/admin/admin-users').then((m) => ({ default: m.AdminUsersPage })),
 );
+const AdminUserProgress = lazy(() =>
+  import('@/pages/admin/admin-user-progress').then((m) => ({ default: m.AdminUserProgressPage })),
+);
 const AdminTeams = lazy(() =>
   import('@/pages/admin/admin-teams').then((m) => ({ default: m.AdminTeamsPage })),
 );
 const AdminMissions = lazy(() =>
   import('@/pages/admin/admin-missions').then((m) => ({ default: m.AdminMissionsPage })),
+);
+const AdminMissionParticipants = lazy(() =>
+  import('@/pages/admin/admin-mission-participants').then((m) => ({ default: m.AdminMissionParticipantsPage })),
 );
 const AdminChallenges = lazy(() =>
   import('@/pages/admin/admin-challenges').then((m) => ({ default: m.AdminChallengesPage })),
@@ -189,6 +195,14 @@ export const AppRoutes = () => {
             }
           />
           <Route
+            path="/admin/users/:id/progress"
+            element={
+              <AdminRoute>
+                <AdminUserProgress />
+              </AdminRoute>
+            }
+          />
+          <Route
             path="/admin/teams"
             element={
               <AdminRoute>
@@ -201,6 +215,14 @@ export const AppRoutes = () => {
             element={
               <AdminRoute>
                 <AdminMissions />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/missions/:id/participants"
+            element={
+              <AdminRoute>
+                <AdminMissionParticipants />
               </AdminRoute>
             }
           />

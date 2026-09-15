@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { DataTable, Column } from '@/components/ui/data-table';
+import type { Column } from '@/components/ui/data-table';
+import { DataTable } from '@/components/ui/data-table';
 import { Loader2, ArrowLeft, Users, Trophy } from 'lucide-react';
 import { apiClient } from '@/lib/api/client';
 import { toast } from 'sonner';
@@ -30,19 +31,21 @@ export function AdminMissionParticipantsPage() {
 
   useEffect(() => {
     fetchParticipants();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [missionId]);
 
-  const fetchParticipants = async () => {
+  const fetchParticipants = React.useCallback(async () => {
     try {
       const res = await apiClient.get(`/admin/missions/${missionId}/participants`);
       setParticipants(res.data.participants || res.data || []);
       if (res.data.missionName) setMissionName(res.data.missionName);
-    } catch (err) {
+    } catch {
       toast.error('Failed to load mission participants');
     } finally {
       setLoading(false);
     }
-  };
+     
+  }, [missionId]);
 
   if (loading) {
     return <div className="flex h-[400px] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;

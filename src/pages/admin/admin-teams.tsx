@@ -9,7 +9,7 @@ import { Users, Edit2, ArrowRightLeft, Loader2, Database, Trash2, Crown } from '
 import { apiClient } from '@/lib/api/client';
 import { getApiError } from '@/lib/api/client';
 import { toast } from 'sonner';
-import type { Team } from '@/lib/api/types';
+import type { Team, User } from '@/lib/api/types';
 
 
 
@@ -63,13 +63,13 @@ export function AdminTeamsPage() {
       if (selectedRosterTeam) {
         setSelectedRosterTeam({
           ...selectedRosterTeam,
-          members: selectedRosterTeam.members.map((m: any) => 
+          members: selectedRosterTeam.members.map((m: User) => 
             (m.id === userId || m._id === userId) ? { ...m, isCaptain: !currentStatus } : m
           )
         });
       }
       fetchTeams(); // Background sync
-    } catch (error) {
+    } catch {
       toast.error('Failed to update captain status');
     }
   };
@@ -284,7 +284,7 @@ export function AdminTeamsPage() {
             <p className="text-center text-muted-foreground py-8">No members in this team yet.</p>
           ) : (
             <div className="space-y-3">
-              {selectedRosterTeam.members.map((member: any) => (
+              {selectedRosterTeam.members.map((member: User) => (
                 <div key={member.id || member._id} className="flex items-center justify-between p-3 rounded-lg border bg-card">
                   <div>
                     <p className="font-medium flex items-center gap-2">
@@ -297,7 +297,7 @@ export function AdminTeamsPage() {
                     variant={member.isCaptain ? "primary" : "outline"}
                     size="sm"
                     className={member.isCaptain ? "bg-yellow-500 hover:bg-yellow-600 text-white" : ""}
-                    onClick={() => handleToggleCaptain(member.id || member._id, !!member.isCaptain)}
+                    onClick={() => handleToggleCaptain((member.id || member._id)!, !!member.isCaptain)}
                   >
                     {member.isCaptain ? "Revoke Captain" : "Make Captain"}
                   </Button>

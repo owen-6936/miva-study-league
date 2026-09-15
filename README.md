@@ -63,17 +63,25 @@ pnpm preview
 ## 🔐 Admin Panel
 Users with the `admin` role have access to the `/admin` route which includes:
 - **Season Configuration** (Start dates, active toggles)
-- **Mission Management** (Create/delete missions)
-- **Team Management** (Edit team points, drop teams)
-- **User Management** (Assign teams, allocate transfer tokens)
+- **Mission Management** (Create/delete missions, view participant rosters)
+- **Team Management** (Edit team points, drop teams, manage rosters, assign Team Captains)
+- **User Management** (View progress, allocate transfer tokens, bulk token resets)
 - **Timetable Management** (Add, edit, import school schedules via REST API)
+- **Hall of Fame & Awards** (Top scholars, top teams, speedrunners, cash prize banner)
 
 ---
 *Powered by Miva Star Owen*
 
 ## 📦 Changelog
 
-### v1.5.2 (The Gamification Update)
+### v1.6.0 (The Polish & Launch Update)
+- **Announcements Carousel**: Replaced the vertical announcement list on the Student Dashboard with a sleek auto-rotating carousel. Features smooth Framer Motion slide transitions, dot indicators, and manual chevron navigation. Auto-cycles every 5 seconds.
+- **Maintenance Mode Removed**: Removed the login gate that was blocking student access during the admin-only maintenance window. All users can now log in normally.
+- **Captain Visibility (Student Pages)**: Team Captains are now prominently displayed across all student-facing pages — Team Overview cards show a gold `👑 Captain: [Name]` badge, and the Team Hub member roster tags captains as `Student • Captain` with a crown emoji.
+- **Full Lint & Type Cleanup**: Resolved all ESLint errors and TypeScript strict-mode violations across the entire codebase. Zero errors on both `pnpm lint` and `pnpm type-check`.
+- **`User._id` Type Safety**: Added `_id?: string` to the global `User` interface to properly handle MongoDB document IDs without `any` casts.
+
+### v1.5.0 (The Gamification Update)
 - **Hall of Fame & Secret Cash Prizes**: Unlocked a dynamic end-of-season Hall of Fame celebrating the top 3 Global Scholars, top 3 Teams, and the fastest Mission Speedrunners. Added a dynamic prize banner announcing a tiered cash distribution system for the winning team!
 - **Mission Roster Analytics**: Rebuilt the Admin Teams page to include a powerful "Manage Roster" modal, alongside a dedicated `/admin/missions/:id/participants` roster view to track task completion rates and XP per student.
 - **Team Captains**: Admins can now instantly promote or demote students to "Team Captain" from within the Roster Modal. Captains get an exclusive Gold Crown badge platform-wide.

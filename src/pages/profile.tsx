@@ -97,7 +97,7 @@ export function Profile() {
       }
     };
     fetchData();
-  }, [user?.id]);
+  }, [user?.id, user?.points, user?.totalPoints]);
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-8">
@@ -129,7 +129,7 @@ export function Profile() {
             <Badge className="text-sm py-1 px-3 bg-primary/10 text-primary hover:bg-primary/20 border-0 flex items-center gap-1">
               {TEAM_EMOJIS[teamName]} Team {teamName}
             </Badge>
-            {(user as any)?.isCaptain && (
+            {(user as User)?.isCaptain && (
               <Badge className="text-sm py-1 px-3 bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20 border-yellow-500/30 flex items-center gap-1">
                 👑 Captain
               </Badge>

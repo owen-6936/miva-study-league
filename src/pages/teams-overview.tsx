@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { TEAM_COLORS, TEAM_EMOJIS, cn } from '@/lib/utils';
 import { ArrowRight, Swords, Trophy, Users, Loader2 , Crown } from 'lucide-react';
 import { apiClient } from '@/lib/api/client';
+import type { User } from '@/lib/api/types';
 import { getApiError } from '@/lib/api/client';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { toast } from 'sonner';
@@ -41,7 +42,7 @@ interface Team {
   name: string;
   members: string[];
   maxMembers: number;
-  captainId?: any;
+  captainId?: User | null;
   points?: number; point?: number;
 }
 

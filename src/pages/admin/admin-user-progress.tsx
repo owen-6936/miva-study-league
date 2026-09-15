@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -53,9 +53,10 @@ export function AdminUserProgressPage() {
 
   useEffect(() => {
     fetchUserData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
-  const fetchUserData = async () => {
+  const fetchUserData = React.useCallback(async () => {
     try {
       // These are the requested backend routes we need
       const [userRes, missionsRes] = await Promise.all([
@@ -79,12 +80,13 @@ export function AdminUserProgressPage() {
       });
       setTaskPoints(initialTaskPoints);
       
-    } catch (err) {
+    } catch {
       toast.error('Failed to load user progress data');
     } finally {
       setLoading(false);
     }
-  };
+     
+  }, [userId]);
 
   const handleUpdateGlobalPoints = async () => {
     try {

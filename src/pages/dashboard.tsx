@@ -338,7 +338,7 @@ export function Dashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="relative">
-                  <div className="relative overflow-hidden min-h-[80px]">
+                  <div className="relative h-[80px] overflow-hidden">
                     <AnimatePresence mode="wait">
                       {announcements.length > 0 && (
                         <motion.div
@@ -347,12 +347,12 @@ export function Dashboard() {
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: -20 }}
                           transition={{ duration: 0.3 }}
-                          className="flex gap-3"
+                          className="absolute inset-0 flex gap-3 overflow-y-auto"
                         >
                           <div className="mt-1.5 h-2 w-2 rounded-full bg-primary shrink-0" />
-                          <div className="w-full">
+                          <div className="w-full pr-2">
                             <h4 className="text-sm font-bold">{announcements[activeAnnouncement]?.title}</h4>
-                            <p className="text-sm text-muted-foreground mt-1 pr-6 leading-relaxed">
+                            <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
                               {announcements[activeAnnouncement]?.content}
                             </p>
                           </div>

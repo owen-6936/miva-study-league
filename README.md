@@ -74,6 +74,12 @@ Users with the `admin` role have access to the `/admin` route which includes:
 
 ## 📦 Changelog
 
+### v1.6.1 (Mission Visibility Fix)
+- **Correct Mission Endpoint**: Switched both the Mission Portal and Dashboard from `/users/me/missions/current` (user-specific) to `/missions/current` (all active platform missions with future deadlines). All published missions now appear correctly.
+- **Multi-Mission Support**: The Mission Portal now renders every active mission as its own full card instead of hard-coding to only the first one.
+- **Dashboard Mission Carousel**: When multiple missions are active, the Dashboard "Current Mission" card cycles through them with animated slide transitions, dot indicators, and chevron controls.
+- **Archive Accordion Fix**: Each past mission in the Mission Archive now has its own independent expand/collapse toggle, and displays `Completed` vs `Expired` badges correctly.
+
 ### v1.6.0 (The Polish & Launch Update)
 - **Announcements Carousel**: Replaced the vertical announcement list on the Student Dashboard with a sleek auto-rotating carousel. Features smooth Framer Motion slide transitions, dot indicators, and manual chevron navigation. Auto-cycles every 5 seconds.
 - **Maintenance Mode Removed**: Removed the login gate that was blocking student access during the admin-only maintenance window. All users can now log in normally.
